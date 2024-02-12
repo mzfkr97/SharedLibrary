@@ -1,9 +1,9 @@
 Pod::Spec.new do |spec|
     spec.name                     = 'sharedLibraryZhurid'
     spec.authors                     = 'Zhurid'
-    spec.version       = "1.0.6"
+    spec.version       = "1.0.1-1_0_5_ver"
     spec.homepage                 = 'https://github.com/mzfkr97/SharedLibrary'
-    spec.source       = { :git => 'https://github.com/mzfkr97/SharedLibrary.git', :branch => '1_0_5_ver' , :tag => spec.version.to_s }
+    spec.source       = { :git => 'https://github.com/mzfkr97/SharedLibrary.git', :branch => '1_0_5_ver'}
     spec.authors                  = 'mzfkr97@gmail.com'
     spec.license                  = 'https://opensource.org/licenses/Apache-2.0'
     spec.summary                  = 'SharedLibraryZhurid'

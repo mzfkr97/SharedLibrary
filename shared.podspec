@@ -2,7 +2,7 @@ Pod::Spec.new do |spec|
     spec.name                     = 'shared'
     spec.version       = "1.0.6"
     spec.homepage                 = 'https://github.com/mzfkr97/SharedLibrary'
-    spec.source       = { :git => 'https://github.com/mzfkr97/SharedLibrary.git', :branch => '1_0_5_ver' }
+    spec.source       = { :http => "https://github.com/mzfkr97/SharedLibrary/tree/shared.xcframework.zip" :branch => "1_0_5_ver" }
     spec.license                  = 'https://opensource.org/licenses/Apache-2.0'
     spec.summary                  = 'SharedLibraryZhurid'
 
