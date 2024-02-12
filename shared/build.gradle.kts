@@ -5,7 +5,7 @@ plugins {
     alias(libs.plugins.androidLibrary)
 }
 
-version = "1.0.0"
+version = "1.0.1"
 val iOSBinaryName = "shared"
 
 kotlin {
@@ -21,7 +21,7 @@ kotlin {
     listOf(
         iosX64(),
         iosArm64(),
-        //iosSimulatorArm64()
+        iosSimulatorArm64()
     ).forEach {
         it.binaries.framework {
             baseName = "shared"
@@ -40,17 +40,17 @@ kotlin {
 
         val iosX64Main by getting
         val iosArm64Main by getting
-       // val iosSimulatorArm64Main by getting
+        val iosSimulatorArm64Main by getting
         val iosMain by creating {
             iosX64Main.dependsOn(this)
             iosArm64Main.dependsOn(this)
-            //iosSimulatorArm64Main.dependsOn(this)
+            iosSimulatorArm64Main.dependsOn(this)
 
         }
 
         val iosX64Test by getting
         val iosArm64Test by getting
-        //val iosSimulatorArm64Test by getting
+        val iosSimulatorArm64Test by getting
     }
 }
 
@@ -102,21 +102,21 @@ tasks.register("prepareReleaseOfiOSXCFramework") {
 }
 
 tasks.create<Zip>("packageDistribution") {
-//    // Delete existing XCFramework
-//    delete("$rootDir/XCFramework")
-//
-//    // Replace XCFramework File at root from Build Directory
-//    copy {
-//        from("$buildDir/XCFrameworks/release")
-//        into("$rootDir/XCFramework")
-//    }
-//
-//    // Delete existing ZIP, if any
-//    delete("$rootDir/${iOSBinaryName}.xcframework.zip")
-//    // ZIP File Name - as per Carthage Nomenclature
-//    archiveFileName.set("${iOSBinaryName}.xcframework.zip")
-//    // Destination for ZIP File
-//    destinationDirectory.set(layout.projectDirectory.dir("../"))
-//    // Source Directory for ZIP
-//    from(layout.projectDirectory.dir("../XCFramework"))
+    // Delete existing XCFramework
+    delete("$rootDir/XCFramework")
+
+    // Replace XCFramework File at root from Build Directory
+    copy {
+        from("$buildDir/XCFrameworks/release")
+        into("$rootDir/XCFramework")
+    }
+
+    // Delete existing ZIP, if any
+    delete("$rootDir/${iOSBinaryName}.xcframework.zip")
+    // ZIP File Name - as per Carthage Nomenclature
+    archiveFileName.set("${iOSBinaryName}.xcframework.zip")
+    // Destination for ZIP File
+    destinationDirectory.set(layout.projectDirectory.dir("../"))
+    // Source Directory for ZIP
+    from(layout.projectDirectory.dir("../XCFramework"))
 }
