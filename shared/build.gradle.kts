@@ -5,7 +5,7 @@ plugins {
     alias(libs.plugins.androidLibrary)
 }
 
-version = "1.0.1"
+version = "1.0.3"
 val iOSBinaryName = "shared"
 
 kotlin {
@@ -24,7 +24,7 @@ kotlin {
         iosSimulatorArm64()
     ).forEach {
         it.binaries.framework {
-            baseName = "shared"
+            baseName = "sharedRoman"
             xcf.add(this)
             isStatic = true
         }
@@ -71,7 +71,7 @@ android {
  * This task prepares Release Artefact for iOS XCFramework
  * Updates Podspec, Package.swift, Carthage contents with version and checksum
  */
-tasks.register("prepareReleaseOfiOSXCFramework") {
+tasks.register("prepareSharedFramework") {
     description = "Publish iOS framework to the Cocoa Repo"
 
     // Create Release Framework for Xcode
