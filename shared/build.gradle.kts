@@ -5,8 +5,8 @@ plugins {
     alias(libs.plugins.androidLibrary)
 }
 
-version = "1.0.2"
-val iOSBinaryName = "sharedRoman"
+version = "1.0.3"
+val iOSBinaryName = "shared"
 
 kotlin {
     androidTarget {
