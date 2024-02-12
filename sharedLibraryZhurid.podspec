@@ -1,11 +1,13 @@
 Pod::Spec.new do |spec|
     spec.name                     = 'sharedLibraryZhurid'
-    spec.version       = "1.0.4"
+    spec.authors                     = 'Zhurid'
+    spec.version       = "1.0.6"
     spec.homepage                 = 'https://github.com/mzfkr97/SharedLibrary'
-    spec.source       = { :http => "https://github.com/mzfkr97/SharedLibrary/releases/download/1.0.1/shared.xcframework.zip"  :branch => "asd"}
+    spec.source       = { :git => 'https://github.com/mzfkr97/SharedLibrary.git', :branch => '1_0_5_ver' , :tag => spec.version.to_s }
     spec.authors                  = 'mzfkr97@gmail.com'
     spec.license                  = 'https://opensource.org/licenses/Apache-2.0'
     spec.summary                  = 'SharedLibraryZhurid'
+
     spec.vendored_frameworks      = "shared.xcframework"
     spec.ios.deployment_target = '11.0'
 

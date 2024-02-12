@@ -7,7 +7,7 @@ plugins {
     alias(libs.plugins.androidLibrary)
 }
 
-version = "1.0.5"
+version = "1.0.6"
 val iOSBinaryName = "shared"
 
 kotlin {
@@ -95,7 +95,7 @@ tasks.register("AprepareSharedFrameworks") {
             if (podcurrentLine?.trim()?.startsWith("spec.version") == true) {
                 podwriter.write("    spec.version       = \"${version}\"" + System.lineSeparator())
             } else if (podcurrentLine?.trim()?.startsWith("spec.source") == true) {
-                podwriter.write("    spec.source       = { :http => \"https://github.com/mzfkr97/SharedLibrary/releases/download/${version}/${iOSBinaryName}.xcframework.zip\" :branch => \"${gitBranch()}\" }" + System.lineSeparator())
+                podwriter.write("    spec.source       = { :http => \"https://github.com/mzfkr97/SharedLibrary/tree/${iOSBinaryName}.xcframework.zip\" :branch => \"${gitBranch()}\" }" + System.lineSeparator())
             } else {
                 podwriter.write(podcurrentLine + System.lineSeparator())
             }
