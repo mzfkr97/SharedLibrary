@@ -1,14 +1,17 @@
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
+import java.io.ByteArrayOutputStream
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
 }
 
-version = "1.0.3"
+version = "1.0.6"
 val iOSBinaryName = "shared"
 
 kotlin {
+
     androidTarget {
         compilations.all {
             kotlinOptions {
@@ -24,7 +27,7 @@ kotlin {
         iosSimulatorArm64()
     ).forEach {
         it.binaries.framework {
-            baseName = "sharedRoman"
+            baseName = "shared"
             xcf.add(this)
             isStatic = true
         }
@@ -52,6 +55,7 @@ kotlin {
         val iosArm64Test by getting
         val iosSimulatorArm64Test by getting
     }
+    applyDefaultHierarchyTemplate()
 }
 
 android {
@@ -71,7 +75,7 @@ android {
  * This task prepares Release Artefact for iOS XCFramework
  * Updates Podspec, Package.swift, Carthage contents with version and checksum
  */
-tasks.register("prepareSharedFramework") {
+tasks.register("AprepareSharedFrameworks") {
     description = "Publish iOS framework to the Cocoa Repo"
 
     // Create Release Framework for Xcode
@@ -81,7 +85,8 @@ tasks.register("prepareSharedFramework") {
         // Update Podspec Version
         val poddir = File("$rootDir/$iOSBinaryName.podspec")
         val podtempFile = File("$rootDir/$iOSBinaryName.podspec.new")
-
+        val gitBranch = gitBranch()
+        logger.debug("*****************Unable to determine current branch: ${gitBranch}")
         val podreader = poddir.bufferedReader()
         val podwriter = podtempFile.bufferedWriter()
         var podcurrentLine: String?
@@ -90,7 +95,7 @@ tasks.register("prepareSharedFramework") {
             if (podcurrentLine?.trim()?.startsWith("spec.version") == true) {
                 podwriter.write("    spec.version       = \"${version}\"" + System.lineSeparator())
             } else if (podcurrentLine?.trim()?.startsWith("spec.source") == true) {
-                podwriter.write("    spec.source       = { :http => \"https://github.com/mzfkr97/SharedLibrary/releases/download/${version}/${iOSBinaryName}.xcframework.zip\"}" + System.lineSeparator())
+                podwriter.write("    spec.source       = { :http => \"https://github.com/mzfkr97/SharedLibrary/tree/${iOSBinaryName}.xcframework.zip\" :branch => \"${gitBranch()}\" }" + System.lineSeparator())
             } else {
                 podwriter.write(podcurrentLine + System.lineSeparator())
             }
@@ -102,21 +107,60 @@ tasks.register("prepareSharedFramework") {
 }
 
 tasks.create<Zip>("packageDistribution") {
-    // Delete existing XCFramework
     delete("$rootDir/XCFramework")
-
-    // Replace XCFramework File at root from Build Directory
     copy {
         from("$buildDir/XCFrameworks/release")
         into("$rootDir/XCFramework")
     }
-
-    // Delete existing ZIP, if any
     delete("$rootDir/${iOSBinaryName}.xcframework.zip")
-    // ZIP File Name - as per Carthage Nomenclature
     archiveFileName.set("${iOSBinaryName}.xcframework.zip")
-    // Destination for ZIP File
     destinationDirectory.set(layout.projectDirectory.dir("../"))
-    // Source Directory for ZIP
     from(layout.projectDirectory.dir("../XCFramework"))
 }
+
+tasks.register<DefaultTask>("uploadFileToGit") {
+    doLast {
+        val gitUrl = "https://github.com/mzfkr97/SharedLibrary/"
+        project.exec {
+            commandLine("git", "add", "$rootDir/${iOSBinaryName}.xcframework.zip")
+            commandLine("git", "commit", "-m", "Add file via Gradle task")
+            commandLine("git", "push", gitUrl)
+        }
+    }
+}
+
+tasks.register("AcreateGitHubFolder") {
+    doLast {
+        val folderName = "newFolder" // Замените на имя вашей папки
+        val localFolderPath = "$projectDir/$folderName" // Путь к папке в вашем проекте
+        val fileName = ".gitkeep" // Имя файла для добавления в папку
+        // Создание папки и файла внутри неё
+        File(localFolderPath).apply {
+            mkdirs()
+            File(this, fileName).createNewFile()
+        }
+        project.exec {
+            commandLine("git", "add", "$folderName/$fileName")
+            commandLine("git", "commit", "-m", "Add file via Gradle task")
+            commandLine("git", "push")
+        }
+    }
+}
+
+fun gitBranch(): String {
+    return try {
+        val byteOut = ByteArrayOutputStream()
+        project.exec {
+            commandLine = "git rev-parse --abbrev-ref HEAD".split(" ")
+            standardOutput = byteOut
+        }
+        String(byteOut.toByteArray()).trim().also {
+            if (it == "HEAD")
+                logger.warn("Unable to determine current branch: Project is checked out with detached head!")
+        }
+    } catch (e: Exception) {
+        logger.warn("Unable to determine current branch: ${e.message}")
+        "Unknown Branch"
+    }
+}
+
