@@ -1,14 +1,19 @@
+import org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
-import java.io.ByteArrayOutputStream
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
 }
 
-version = "1.0.6"
+version = "1.0.7"
 val iOSBinaryName = "shared"
+
+val aACreateFileTask by tasks.registering(AACreateFileTask::class)
+aACreateFileTask.configure {
+    actions.clear()
+    localFolderPath = "$projectDir/releases/$version"
+}
 
 kotlin {
 
@@ -19,7 +24,7 @@ kotlin {
             }
         }
     }
-    
+
     val xcf = XCFramework()
     listOf(
         iosX64(),
@@ -69,24 +74,20 @@ android {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
 }
+tasks.getByName("aACreateFileTask")
 
-
-/**
- * This task prepares Release Artefact for iOS XCFramework
- * Updates Podspec, Package.swift, Carthage contents with version and checksum
- */
-tasks.register("AprepareSharedFrameworks") {
+val aaprepareSharedFrameworks: TaskProvider<Task> by tasks.registering {
     description = "Publish iOS framework to the Cocoa Repo"
 
-    // Create Release Framework for Xcode
     dependsOn("assembleXCFramework", "packageDistribution")
 
+    doFirst {
+        aACreateFileTask.get()
+    }
     doLast {
         // Update Podspec Version
         val poddir = File("$rootDir/$iOSBinaryName.podspec")
         val podtempFile = File("$rootDir/$iOSBinaryName.podspec.new")
-        val gitBranch = gitBranch()
-        logger.debug("*****************Unable to determine current branch: ${gitBranch}")
         val podreader = poddir.bufferedReader()
         val podwriter = podtempFile.bufferedWriter()
         var podcurrentLine: String?
@@ -95,7 +96,7 @@ tasks.register("AprepareSharedFrameworks") {
             if (podcurrentLine?.trim()?.startsWith("spec.version") == true) {
                 podwriter.write("    spec.version       = \"${version}\"" + System.lineSeparator())
             } else if (podcurrentLine?.trim()?.startsWith("spec.source") == true) {
-                podwriter.write("    spec.source       = { :http => \"https://github.com/mzfkr97/SharedLibrary/tree/${iOSBinaryName}.xcframework.zip\" :branch => \"${gitBranch()}\" }" + System.lineSeparator())
+                podwriter.write("    spec.source       = { :http => \"https://github.com/mzfkr97/SharedLibrary/tree/${iOSBinaryName}.xcframework.zip\" }" + System.lineSeparator())
             } else {
                 podwriter.write(podcurrentLine + System.lineSeparator())
             }
@@ -104,9 +105,13 @@ tasks.register("AprepareSharedFrameworks") {
         podreader.close()
         podtempFile.renameTo(poddir)
     }
+//    project.exec {
+//        commandLine("git", "add", localFolderPath)
+//    }
 }
 
 tasks.create<Zip>("packageDistribution") {
+    val localFolderPath = "$projectDir/releases/$version"
     delete("$rootDir/XCFramework")
     copy {
         from("$buildDir/XCFrameworks/release")
@@ -114,53 +119,64 @@ tasks.create<Zip>("packageDistribution") {
     }
     delete("$rootDir/${iOSBinaryName}.xcframework.zip")
     archiveFileName.set("${iOSBinaryName}.xcframework.zip")
-    destinationDirectory.set(layout.projectDirectory.dir("../"))
+    //destinationDirectory.set(layout.projectDirectory.dir("../"))
+    destinationDirectory.set(layout.projectDirectory.dir(localFolderPath))
     from(layout.projectDirectory.dir("../XCFramework"))
 }
 
-tasks.register<DefaultTask>("uploadFileToGit") {
+val AAcreateGitHubFolder: TaskProvider<Task> by tasks.registering {
     doLast {
-        val gitUrl = "https://github.com/mzfkr97/SharedLibrary/"
-        project.exec {
-            commandLine("git", "add", "$rootDir/${iOSBinaryName}.xcframework.zip")
-            commandLine("git", "commit", "-m", "Add file via Gradle task")
-            commandLine("git", "push", gitUrl)
+        val folderName = "releases"
+        val dir = file("$projectDir/$folderName/$version")
+        if (!dir.exists()) {
+            dir.mkdirs()
+        } else {
+            println("Каталог '${dir.absolutePath}' уже существует.")
         }
+//        project.exec {
+//            commandLine("git", "add", "$projectDir/$folderName/$version")
+//
+//            //commandLine = "git add $localFolderPath".split(" ")
+//            //commandLine = "git commit -m"
+//            //commandLine = "git push".split(" ")
+////            commandLine("git", "add", "$folderName/$fileName")
+////            commandLine("git", "commit", "-m", "Add file via Gradle task")
+////            commandLine("git", "push")
+//        }
     }
 }
 
-tasks.register("AcreateGitHubFolder") {
-    doLast {
-        val folderName = "newFolder" // Замените на имя вашей папки
-        val localFolderPath = "$projectDir/$folderName" // Путь к папке в вашем проекте
-        val fileName = ".gitkeep" // Имя файла для добавления в папку
-        // Создание папки и файла внутри неё
-        File(localFolderPath).apply {
-            mkdirs()
-            File(this, fileName).createNewFile()
-        }
-        project.exec {
-            commandLine("git", "add", "$folderName/$fileName")
-            commandLine("git", "commit", "-m", "Add file via Gradle task")
-            commandLine("git", "push")
-        }
+//fun gitBranch(): String =
+//    runCatching {
+//        val byteOut = ByteArrayOutputStream()
+//        project.exec {
+//            commandLine = "git rev-parse --abbrev-ref HEAD".split(" ")
+//            standardOutput = byteOut
+//        }
+//        String(byteOut.toByteArray()).trim().also {
+//            if (it == "HEAD") {
+//                logger.warn("Unable to determine current branch: Project is checked out with detached head!")
+//            }
+//        }
+//    }.getOrElse { error ->
+//        logger.warn("Unable to determine current branch: ${error.message}")
+//        "master"
+//    }
+
+abstract class AACreateFileTask : DefaultTask() {
+
+    @get:Input
+    abstract val localFolderPath: Property<String>
+
+    @TaskAction
+    fun action() {
+
+//        project.tasks.assemble.dependsOn(
+//            project.tasks.named("assembleXCFramework"),
+//            project.tasks.named("packageDistribution")
+//        )
+
+        val dir = File(localFolderPath.get())
+        if (!dir.exists()) dir.mkdirs()
     }
 }
-
-fun gitBranch(): String {
-    return try {
-        val byteOut = ByteArrayOutputStream()
-        project.exec {
-            commandLine = "git rev-parse --abbrev-ref HEAD".split(" ")
-            standardOutput = byteOut
-        }
-        String(byteOut.toByteArray()).trim().also {
-            if (it == "HEAD")
-                logger.warn("Unable to determine current branch: Project is checked out with detached head!")
-        }
-    } catch (e: Exception) {
-        logger.warn("Unable to determine current branch: ${e.message}")
-        "Unknown Branch"
-    }
-}
-
