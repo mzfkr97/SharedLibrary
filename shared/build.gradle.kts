@@ -123,7 +123,7 @@ val AAcreateGitHubFolder: TaskProvider<Task> by tasks.registering {
         if (!dir.exists()) {
             dir.mkdirs()
         } else {
-            println("Каталог '${dir.absolutePath}' уже существует.")
+            logger.lifecycle("Каталог '${dir.absolutePath}' уже существует.")
         }
 //        project.exec {
 //            commandLine("git", "add", "$projectDir/$folderName/$version")
@@ -361,4 +361,6 @@ val updatePodSpec by tasks.registering {
         """.trimIndent()
     val outFile = File(project.rootDir, "${project.name}.podspec")
     outFile.writeText(podspec)
+
+    logger.lifecycle("Каталог ${podspec}")
 }
