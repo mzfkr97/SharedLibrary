@@ -99,43 +99,6 @@ android {
     }
 }
 
-val aaprepareSharedFrameworks: TaskProvider<Task> by tasks.registering {
-    group = IOS_PUBLISHING
-    description = "Publish iOS framework to the Cocoa Repo"
-
-    dependsOn("assembleXCFramework", "packageDistribution")
-//
-//    doFirst {
-//        aACreateFileTask.get()
-//    }
-//    doLast {
-//        // Update Podspec Version
-//        val poddir = File("$rootDir/$iOSBinaryName.podspec")
-//        val podtempFile = File("$rootDir/$iOSBinaryName.podspec.new")
-//        val podreader = poddir.bufferedReader()
-//        val podwriter = podtempFile.bufferedWriter()
-//        var podcurrentLine: String?
-//
-//        while (podreader.readLine().also { currLine -> podcurrentLine = currLine } != null) {
-//            if (podcurrentLine?.trim()?.startsWith("spec.version") == true) {
-//                podwriter.write("    spec.version       = \"${version}\"" + System.lineSeparator())
-//            } else if (podcurrentLine?.trim()?.startsWith("spec.source") == true) {
-//                podwriter.write("    spec.source       = { :http => \"https://github.com/mzfkr97/SharedLibrary/tree/${iOSBinaryName}.xcframework.zip\" }" + System.lineSeparator())
-//            } else {
-//                podwriter.write(podcurrentLine + System.lineSeparator())
-//            }
-//        }
-//        podwriter.close()
-//        podreader.close()
-//        podtempFile.renameTo(poddir)
-//    }
-//    project.exec {
-//        commandLine("git", "add", localFolderPath)
-//    }
-
-
-}
-
 tasks.create<Zip>("packageDistribution") {
     group = IOS_PUBLISHING
     val localFolderPath = "$projectDir/releases/$version"
@@ -196,8 +159,6 @@ tasks.register("AAAcommitChanges") {
     group = IOS_PUBLISHING
     description = "Commits all changes with a default commit message."
 
-    dependsOn(aaprepareSharedFrameworks)
-
     val gitStatusOutput = ByteArrayOutputStream()
     exec {
         commandLine = listOf("git", "status", "--porcelain")
@@ -217,8 +178,13 @@ tasks.register("AAAcommitChanges") {
 
 val gitStatus by tasks.registering(Exec::class) {
     group = IOS_PUBLISHING
-    commandLine("git", "status", "--porcelain")
-    standardOutput = ByteArrayOutputStream()
+//    commandLine("git", "status", "--porcelain")
+//    standardOutput = ByteArrayOutputStream()
+    val gitStatusOutput = ByteArrayOutputStream()
+    exec {
+        commandLine = listOf("git", "status", "--porcelain")
+        standardOutput = gitStatusOutput
+    }
 }
 
 val AAAgitCommit by tasks.registering(Exec::class) {
