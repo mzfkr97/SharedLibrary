@@ -225,11 +225,11 @@ val gitStatus by tasks.registering(Exec::class) {
 
 val AAAgitCommit by tasks.registering(Exec::class) {
     dependsOn(gitStatus)
-    val changes = gitStatus.get().standardOutput.toString().trim()
-
-    onlyIf { changes.isNotEmpty() }
+    onlyIf { gitStatus.get().standardOutput.toString().trim().isNotEmpty() }
     commandLine("git", "commit", "-am", "Автоматический коммит")
 }
+
+
 abstract class AACreateFileTask : DefaultTask() {
 
     @get:Input
