@@ -340,6 +340,7 @@ val getCurrentPublishedPodVersion by tasks.registering {
 }
 
 val updatePodSpec by tasks.registering {
+    group = IOS_PUBLISHING
     val podspec = """
             Pod::Spec.new do |spec|
                 spec.name                     = '${project.name}'
@@ -360,5 +361,4 @@ val updatePodSpec by tasks.registering {
         """.trimIndent()
     val outFile = File(project.rootDir, "${project.name}.podspec")
     outFile.writeText(podspec)
-
 }
