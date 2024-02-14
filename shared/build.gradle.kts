@@ -235,6 +235,7 @@ val AAAgitCommit by tasks.registering(Exec::class) {
         }
     }
 }
+
 abstract class AACreateFileTask : DefaultTask() {
 
     @get:Input
