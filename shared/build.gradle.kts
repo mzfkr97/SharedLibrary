@@ -12,33 +12,6 @@ version = "1.0.22"
 val iOSBinaryName = "shared"
 val IOS_PUBLISHING = "ios_publishing"
 
-//val aaPodspecTask by tasks.registering(APodspecTask::class)
-//val aaPodspecDeployTask by tasks.registering(PodspecDeployTask::class)
-//
-//aaPodspecDeployTask.configure {
-//    podspecName.convention("sharedLibraryZhurid.podspec")
-//}
-//
-//
-//aaPodspecTask.configure {
-//    val extensionName = "iosDeploy"
-//    val extensionsa = project.extensions.create(extensionName, DeployExtension::class.java)
-//    extensionsa.summary = "summary"
-//    extensionsa.homepage = "homepage"
-//    extensionsa.gitUrl = ""
-//    extensionsa.authors = ""
-//    extensionsa.licenseType = ""
-//    extensionsa.licenseFile = ""
-//    extensionsa.specRepository = SpecRepository(
-//        name = "name",
-//        url = "url",
-//    )
-//    extension.convention(
-//        extensionsa
-//    )
-//    xcFrameworkPath.convention("shared.xcframework")
-//}
-
 kotlin {
 
     androidTarget {
@@ -112,7 +85,6 @@ tasks.create<Zip>("packageDistribution") {
     //destinationDirectory.set(layout.projectDirectory.dir("../"))
     destinationDirectory.set(layout.projectDirectory.dir(localFolderPath))
     from(layout.projectDirectory.dir("../XCFramework"))
-
 }
 
 val AAcreateGitHubFolder: TaskProvider<Task> by tasks.registering {
@@ -186,16 +158,16 @@ val gitCommit by tasks.registering(Exec::class) {
     group = IOS_PUBLISHING
     dependsOn("assembleXCFramework", "packageDistribution")
 
+    commandLine = listOf("git", "add", "$projectDir/releases/$version")
+
     onlyIf { gitStatus.get().standardOutput.toString().trim().isNotEmpty() }
     doLast {
         exec {
-            commandLine = listOf("git", "add", ".")
+            commandLine = listOf("git", "add", "$projectDir/releases/$version")
         }
         exec {
             commandLine = listOf("git", "commit", "-am", "Commit changes")
         }
-//        commandLine("git", "commit", "-am", "Автоматический коммит")
-//        commandLine("git", "commit", "-am", "Автоматический коммит")
     }
 }
 
