@@ -294,7 +294,7 @@ abstract class PodspecDeployTask: Exec() {
     }
 }
 
-tasks.register("AA_pushPod") {
+val pushPod by tasks.registering {
     group = IOS_PUBLISHING
     doLast {
         val process = ProcessBuilder(
