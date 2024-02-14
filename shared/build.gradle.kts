@@ -146,7 +146,7 @@ tasks.create<Zip>("packageDistribution") {
     //destinationDirectory.set(layout.projectDirectory.dir("../"))
     destinationDirectory.set(layout.projectDirectory.dir(localFolderPath))
     from(layout.projectDirectory.dir("../XCFramework"))
-
+    
 }
 
 val AAcreateGitHubFolder: TaskProvider<Task> by tasks.registering {
@@ -219,13 +219,11 @@ val AAAgitCommit by tasks.registering(Exec::class) {
     dependsOn("assembleXCFramework", "packageDistribution", gitStatus)
 
     onlyIf { gitStatus.get().standardOutput.toString().trim().isNotEmpty() }
-
-}
-AAAgitCommit.configure {
     doLast {
         commandLine("git", "commit", "-am", "Автоматический коммит")
     }
 }
+
 
 abstract class AACreateFileTask : DefaultTask() {
 
