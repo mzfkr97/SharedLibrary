@@ -211,7 +211,6 @@ abstract class AACreateFileTask : DefaultTask() {
 }
 
 
-
 abstract class APodspecTask : DefaultTask() {
 
     init {
@@ -225,7 +224,7 @@ abstract class APodspecTask : DefaultTask() {
     @get:Input
     abstract val xcFrameworkPath: Property<String>
 
-    private fun getPodspec(extension: DeployExtension) : String {
+    private fun getPodspec(extension: DeployExtension): String {
         return """
             Pod::Spec.new do |spec|
                 spec.name                     = '${project.name}'
@@ -266,9 +265,9 @@ abstract class DeployExtension @Inject constructor() {
 
 }
 
-data class SpecRepository(val name : String, val url : String)
+data class SpecRepository(val name: String, val url: String)
 
-abstract class PodspecDeployTask: Exec() {
+abstract class PodspecDeployTask : Exec() {
 
     init {
         description = "Deploys podspec"
@@ -314,8 +313,9 @@ val pushPod by tasks.registering {
     }
 }
 
-val getCurrentPublishedPodVersion by tasks.registering{
+val getCurrentPublishedPodVersion by tasks.registering {
     group = IOS_PUBLISHING
+
     doLast {
         val podName = "sharedLibraryZhurid"
         val outputStream = ByteArrayOutputStream()
