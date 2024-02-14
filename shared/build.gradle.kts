@@ -338,3 +338,27 @@ val getCurrentPublishedPodVersion by tasks.registering {
         }
     }
 }
+
+val updatePodSpec by tasks.registering {
+    val podspec = """
+            Pod::Spec.new do |spec|
+                spec.name                     = '${project.name}'
+                spec.version                  = '${project.version}'
+                spec.homepage                 = 'https://github.com/mzfkr97/SharedLibrary'
+                spec.source       = { :http => "https://github.com/mzfkr97/SharedLibrary/releases/${project.version}/shared.xcframework.zip" }
+                spec.authors                  = 'mzfkr97'
+                spec.license                  = 'https://opensource.org/licenses/Apache-2.0'
+                spec.summary                  = 'SharedLibrary summary'
+                spec.vendored_frameworks      = "shared.xcframework.zip"
+                spec.libraries                = "c++"
+                spec.static_framework         = true
+                spec.module_name              = "#{spec.name}_umbrella"
+                spec.pod_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64' }
+                spec.user_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64' }
+                spec.ios.deployment_target = '11.0'
+            end
+        """.trimIndent()
+    val outFile = File(project.rootDir, "${project.name}.podspec")
+    outFile.writeText(podspec)
+
+}
