@@ -8,7 +8,7 @@ plugins {
     //id("io.github.donadev.kmm.ios_deploy.plugin") version "0.0.20"
 }
 
-version = "1.0.17"
+version = "1.0.21"
 val iOSBinaryName = "shared"
 
 val aaPodspecTask by tasks.registering(APodspecTask::class)
@@ -345,6 +345,7 @@ tasks.register("AA_pushPod") {
 }
 
 tasks.register("AA_getCurrentPublishedPodVersion") {
+    group = "ios_publishing"
     doLast {
         val podName = "sharedLibraryZhurid"
         val outputStream = ByteArrayOutputStream()
