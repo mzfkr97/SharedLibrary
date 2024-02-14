@@ -189,7 +189,7 @@ val gitStatus by tasks.registering(Exec::class) {
 
 val AAAgitCommit by tasks.registering(Exec::class) {
     group = IOS_PUBLISHING
-    dependsOn("assembleXCFramework", "packageDistribution")
+    //dependsOn("assembleXCFramework", "packageDistribution")
 
     onlyIf { gitStatus.get().standardOutput.toString().trim().isNotEmpty() }
     doLast {
