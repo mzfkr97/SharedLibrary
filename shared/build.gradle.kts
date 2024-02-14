@@ -157,9 +157,9 @@ val gitStatus by tasks.registering(Exec::class) {
 val gitCommit by tasks.registering(Exec::class) {
     group = IOS_PUBLISHING
     dependsOn("assembleXCFramework", "packageDistribution")
-    
+
     exec {
-        commandLine = listOf("git", "add", "$projectDir/releases/$version/shared.xcframework.zip")
+        commandLine = listOf("git", "add", "$projectDir/releases/$version")
     }
     onlyIf { gitStatus.get().standardOutput.toString().trim().isNotEmpty() }
     doLast {
