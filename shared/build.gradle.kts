@@ -160,14 +160,12 @@ val gitCommit by tasks.registering(Exec::class) {
 
     val isit  = gitStatus.get().standardOutput.toString().trim().isNotEmpty()
     logger.lifecycle("***************** $isit.")
-    onlyIf { gitStatus.get().standardOutput.toString().trim().isNotEmpty() }
-    doLast {
-        exec {
-            commandLine = listOf("git", "add", "$projectDir/releases/$version")
-        }
-        exec {
-            commandLine = listOf("git", "commit", "-am", "Commit changes")
-        }
+    //onlyIf { gitStatus.get().standardOutput.toString().trim().isNotEmpty() }
+    exec {
+        commandLine = listOf("git", "add", "$projectDir/releases/$version")
+    }
+    exec {
+        commandLine = listOf("git", "commit", "-am", "Commit changes")
     }
 }
 
