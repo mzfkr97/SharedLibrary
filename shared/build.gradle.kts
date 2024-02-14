@@ -158,14 +158,14 @@ val gitCommit by tasks.registering(Exec::class) {
     group = IOS_PUBLISHING
     dependsOn("assembleXCFramework", "packageDistribution")
 
-    val isit  = gitStatus.get().standardOutput.toString().trim().isNotEmpty()
-    logger.lifecycle("***************** $isit.")
-    //onlyIf { gitStatus.get().standardOutput.toString().trim().isNotEmpty() }
-    exec {
-        commandLine = listOf("git", "add", "$projectDir/releases/$version")
-    }
-    exec {
-        commandLine = listOf("git", "commit", "-am", "Commit changes")
+    onlyIf { gitStatus.get().standardOutput.toString().trim().isNotEmpty() }
+    doLast {
+        exec {
+            commandLine = listOf("git", "add", "$projectDir/releases/$version")
+        }
+        exec {
+            commandLine = listOf("git", "commit", "-am", "Commit changes")
+        }
     }
 }
 
@@ -244,4 +244,26 @@ val updatePodSpec by tasks.registering {
     outFile.writeText(podspec)
 
     logger.lifecycle("Pod: ${podspec}")
+}
+
+tasks.register("uploadXCFramework", Exec::class) {
+    group = IOS_PUBLISHING
+    dependsOn("createXCFramework")
+    doLast {
+        val githubToken = System.getenv("GITHUB_TOKEN")
+        val owner = "<владелец_репозитория>"
+        val repo = "<имя_репозитория>"
+        val tag = "<тег_релиза>"
+        val filename = "<имя_файла>.xcframework.zip"
+
+        val uploadUrl = "https://uploads.github.com/repos/$owner/$repo/releases/$tag/assets?name=$filename"
+        val mimeType = "application/zip"
+
+        commandLine("curl",
+            "-H", "Authorization: token $githubToken",
+            "-H", "Content-Type: $mimeType",
+            "--data-binary", "@$filename",
+            "$uploadUrl"
+        )
+    }
 }
