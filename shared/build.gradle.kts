@@ -219,8 +219,8 @@ val AAAgitCommit by tasks.registering(Exec::class) {
     dependsOn("assembleXCFramework", "packageDistribution", gitStatus)
 
     onlyIf { gitStatus.get().standardOutput.toString().trim().isNotEmpty() }
-    exec {
-        commandLine = listOf("git", "commit", "-am", "Commit changes")
+    doLast {
+        commandLine("git", "commit", "-am", "Автоматический коммит")
     }
 }
 
