@@ -207,26 +207,19 @@ tasks.register("AAAcommitChanges") {
             commandLine = listOf("git", "commit", "-m", "Commit changes")
         }
     }
-
-//    doLast {
-//        exec {
-//            commandLine("git", "add", "$projectDir/releases/$version")
-//        }
-//        exec {
-//            commandLine("git", "commit", "-m", "Committing all changes")
-//        }
-//
-//    }
 }
+
 val gitStatus by tasks.registering(Exec::class) {
     commandLine("git", "status", "--porcelain")
     standardOutput = ByteArrayOutputStream()
 }
 
 val AAAgitCommit by tasks.registering(Exec::class) {
-    dependsOn(gitStatus)
+    dependsOn(aaprepareSharedFrameworks, gitStatus)
     onlyIf { gitStatus.get().standardOutput.toString().trim().isNotEmpty() }
-    commandLine("git", "commit", "-am", "Автоматический коммит")
+    afterEvaluate {
+        commandLine("git", "commit", "-am", "Автоматический коммит")
+    }
 }
 
 
