@@ -215,8 +215,8 @@ val gitStatus by tasks.registering(Exec::class) {
 }
 
 val AAAgitCommit by tasks.registering(Exec::class) {
-    dependsOn(gitStatus)
     dependsOn("assembleXCFramework", "packageDistribution")
+    dependsOn(gitStatus)
 
     onlyIf { gitStatus.get().standardOutput.toString().trim().isNotEmpty() }
     doLast {
