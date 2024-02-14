@@ -8,7 +8,7 @@ plugins {
     //id("io.github.donadev.kmm.ios_deploy.plugin") version "0.0.20"
 }
 
-version = "1.0.15"
+version = "1.0.17"
 val iOSBinaryName = "shared"
 
 val aaPodspecTask by tasks.registering(APodspecTask::class)
