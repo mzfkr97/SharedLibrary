@@ -163,7 +163,7 @@ val gitCommit by tasks.registering(Exec::class) {
     onlyIf { gitStatus.get().standardOutput.toString().trim().isNotEmpty() }
     doLast {
         exec {
-            commandLine = listOf("git", "add", "$projectDir/releases/$version.shared.xcframework.zip")
+            commandLine = listOf("git", "add", "$projectDir/releases/$version/shared.xcframework.zip")
         }
         exec {
             commandLine = listOf("git", "commit", "-am", "Commit changes")
