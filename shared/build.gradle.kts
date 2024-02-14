@@ -159,15 +159,12 @@ val gitCommit by tasks.registering(Exec::class) {
     dependsOn("assembleXCFramework", "packageDistribution")
 
     onlyIf { gitStatus.get().standardOutput.toString().trim().isNotEmpty() }
-    afterEvaluate {
-        exec {
-            commandLine = listOf("git", "commit", "-am", "Commit changes")
-        }
-    }
-    afterEvaluate {
-
+    doLast {
         exec {
             commandLine = listOf("git", "add", "$projectDir/releases/$version")
+        }
+        exec {
+            commandLine = listOf("git", "commit", "-am", "Commit changes")
         }
     }
 }
