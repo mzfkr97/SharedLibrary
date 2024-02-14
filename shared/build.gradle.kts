@@ -158,6 +158,8 @@ val gitCommit by tasks.registering(Exec::class) {
     group = IOS_PUBLISHING
     dependsOn("assembleXCFramework", "packageDistribution")
 
+    val isit  = gitStatus.get().standardOutput.toString().trim().isNotEmpty()
+    logger.lifecycle("***************** $isit.")
     onlyIf { gitStatus.get().standardOutput.toString().trim().isNotEmpty() }
     doLast {
         exec {
@@ -243,5 +245,5 @@ val updatePodSpec by tasks.registering {
     val outFile = File(project.rootDir, "sharedLibraryZhurid.podspec") //"${project.name}.podspec"
     outFile.writeText(podspec)
 
-    logger.lifecycle("Каталог ${podspec}")
+    logger.lifecycle("Pod: ${podspec}")
 }
