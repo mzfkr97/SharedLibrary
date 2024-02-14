@@ -1,18 +1,41 @@
-import org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
+import java.io.ByteArrayOutputStream
+
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
+    //id("io.github.donadev.kmm.ios_deploy.plugin") version "0.0.20"
 }
 
-version = "1.0.7"
+version = "1.0.8"
 val iOSBinaryName = "shared"
 
-val aACreateFileTask by tasks.registering(AACreateFileTask::class)
-aACreateFileTask.configure {
-    actions.clear()
-    localFolderPath = "$projectDir/releases/$version"
+val aaPodspecTask by tasks.registering(APodspecTask::class)
+val aaPodspecDeployTask by tasks.registering(PodspecDeployTask::class)
+
+aaPodspecDeployTask.configure {
+    podspecName.convention("sharedLibraryZhurid.podspec")
+}
+
+
+aaPodspecTask.configure {
+    val extensionName = "iosDeploy"
+    val extensionsa = project.extensions.create(extensionName, DeployExtension::class.java)
+    extensionsa.summary = "summary"
+    extensionsa.homepage = "homepage"
+    extensionsa.gitUrl = ""
+    extensionsa.authors = ""
+    extensionsa.licenseType = ""
+    extensionsa.licenseFile = ""
+    extensionsa.specRepository = SpecRepository(
+        name = "name",
+        url = "url",
+    )
+    extension.convention(
+        extensionsa
+    )
+    xcFrameworkPath.convention("shared.xcframework")
 }
 
 kotlin {
@@ -74,16 +97,15 @@ android {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
 }
-tasks.getByName("aACreateFileTask")
 
 val aaprepareSharedFrameworks: TaskProvider<Task> by tasks.registering {
     description = "Publish iOS framework to the Cocoa Repo"
 
     dependsOn("assembleXCFramework", "packageDistribution")
-
-    doFirst {
-        aACreateFileTask.get()
-    }
+//
+//    doFirst {
+//        aACreateFileTask.get()
+//    }
     doLast {
         // Update Podspec Version
         val poddir = File("$rootDir/$iOSBinaryName.podspec")
@@ -178,5 +200,130 @@ abstract class AACreateFileTask : DefaultTask() {
 
         val dir = File(localFolderPath.get())
         if (!dir.exists()) dir.mkdirs()
+    }
+}
+
+
+
+abstract class APodspecTask : DefaultTask() {
+
+    init {
+        description = "Generate podspec"
+    }
+
+    @get:Input
+    abstract val extension: Property<DeployExtension>
+
+    @get:Input
+    abstract val xcFrameworkPath: Property<String>
+
+    private fun getPodspec(extension: DeployExtension) : String {
+        return """
+            Pod::Spec.new do |spec|
+                spec.name                     = '${project.name}'
+                spec.version                  = '${project.version}'
+                spec.homepage                 = '${extension.homepage.get()}'
+                spec.source                   = { :git => "${extension.gitUrl.get()}", :tag => spec.version.to_s }
+                spec.authors                  = '${extension.authors.get()}'
+                spec.license                  = { :type => '${extension.licenseType.get()}', :file => '${extension.licenseFile.get()}' }
+                spec.summary                  = '${extension.summary.get()}'
+                spec.vendored_frameworks      = "${xcFrameworkPath.get()}"
+                spec.libraries                = "c++"
+                spec.static_framework         = true
+                spec.module_name              = "#{spec.name}_umbrella"
+                spec.pod_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64' }
+                spec.user_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64' }
+                spec.ios.deployment_target = '11.0'
+            end
+        """.trimIndent()
+    }
+
+    @TaskAction
+    fun execute() {
+        val podspec = getPodspec(extension.get())
+        val outFile = File(project.rootDir, "${project.name}.podspec")
+        outFile.writeText(podspec)
+    }
+}
+
+abstract class DeployExtension @Inject constructor() {
+
+    abstract val summary: Property<String>
+    abstract val specRepository: Property<SpecRepository>
+    abstract val gitUrl: Property<String>
+    abstract val homepage: Property<String>
+    abstract val authors: Property<String>
+    abstract val licenseType: Property<String>
+    abstract val licenseFile: Property<String>
+
+}
+
+data class SpecRepository(val name : String, val url : String)
+
+abstract class PodspecDeployTask: Exec() {
+
+    init {
+        description = "Deploys podspec"
+        //dependsOn("aaPodspecTask")
+        //dependsOn("podRepo")
+        workingDir = project.rootDir
+    }
+
+    @get:Input
+    abstract val podspecName: Property<String>
+
+    override fun exec() {
+        executable = "pod"
+        args(mutableListOf<String>().apply {
+            add("trunk")
+            add("push")
+            add(podspecName.get())
+            add("--allow-warnings")
+            //add(extension.get().specRepository.get().name)
+        })
+        super.exec()
+    }
+}
+
+tasks.register("AA_pushPod") {
+    doLast {
+        val process = ProcessBuilder(
+            "pod", "trunk", "push", "sharedLibraryZhurid.podspec", "--allow-warnings"
+        ).apply {
+            directory(project.rootDir)
+            redirectErrorStream(true)
+        }.start()
+
+        process.inputStream.bufferedReader().use {
+            it.lines().forEach { line -> println(line) }
+        }
+        val exitCode = process.waitFor()
+        if (exitCode != 0) {
+            throw RuntimeException("pushPod Failed Execution of pod trunk push failed with exit code $exitCode")
+        }
+    }
+}
+
+tasks.register("AA_getCurrentPublishedPodVersion") {
+    doLast {
+        val podName = "sharedLibraryZhurid"
+        val outputStream = ByteArrayOutputStream()
+        val process = ProcessBuilder("pod", "search", podName, "--simple", "--no-ansi")
+            .redirectOutput(ProcessBuilder.Redirect.PIPE)
+            .redirectErrorStream(true)
+            .start()
+        process.inputStream.copyTo(outputStream)
+        val exitCode = process.waitFor()
+        if (exitCode != 0) {
+            throw RuntimeException("Execution of pod search failed with exit code $exitCode")
+        }
+        val result = outputStream.toString()
+        val versionLine = result.lines().find { it.contains(podName) }
+        val version = versionLine?.substringAfter("$podName (")?.substringBefore(")")
+        if (version != null) {
+            println("Current published version of $podName is: $version")
+        } else {
+            println("Unable to find the current published version of $podName.")
+        }
     }
 }
