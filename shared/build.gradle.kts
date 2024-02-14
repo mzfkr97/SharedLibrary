@@ -10,6 +10,7 @@ plugins {
 
 version = "1.0.21"
 val iOSBinaryName = "shared"
+val IOS_PUBLISHING = "ios_publishing"
 
 val aaPodspecTask by tasks.registering(APodspecTask::class)
 val aaPodspecDeployTask by tasks.registering(PodspecDeployTask::class)
@@ -99,6 +100,7 @@ android {
 }
 
 val aaprepareSharedFrameworks: TaskProvider<Task> by tasks.registering {
+    group = IOS_PUBLISHING
     description = "Publish iOS framework to the Cocoa Repo"
 
     dependsOn("assembleXCFramework", "packageDistribution")
@@ -135,6 +137,7 @@ val aaprepareSharedFrameworks: TaskProvider<Task> by tasks.registering {
 }
 
 tasks.create<Zip>("packageDistribution") {
+    group = IOS_PUBLISHING
     val localFolderPath = "$projectDir/releases/$version"
     delete("$rootDir/XCFramework")
     copy {
@@ -150,6 +153,7 @@ tasks.create<Zip>("packageDistribution") {
 }
 
 val AAcreateGitHubFolder: TaskProvider<Task> by tasks.registering {
+    group = IOS_PUBLISHING
     doLast {
         val folderName = "releases"
         val dir = file("$projectDir/$folderName/$version")
@@ -189,6 +193,7 @@ val AAcreateGitHubFolder: TaskProvider<Task> by tasks.registering {
 //    }
 
 tasks.register("AAAcommitChanges") {
+    group = IOS_PUBLISHING
     description = "Commits all changes with a default commit message."
 
     dependsOn(aaprepareSharedFrameworks)
@@ -211,12 +216,14 @@ tasks.register("AAAcommitChanges") {
 }
 
 val gitStatus by tasks.registering(Exec::class) {
+    group = IOS_PUBLISHING
     commandLine("git", "status", "--porcelain")
     standardOutput = ByteArrayOutputStream()
 }
 
 val AAAgitCommit by tasks.registering(Exec::class) {
-    dependsOn("assembleXCFramework", "packageDistribution", gitStatus)
+    group = IOS_PUBLISHING
+    dependsOn("assembleXCFramework", "packageDistribution")
 
     onlyIf { gitStatus.get().standardOutput.toString().trim().isNotEmpty() }
     doLast {
@@ -247,6 +254,7 @@ abstract class AACreateFileTask : DefaultTask() {
 abstract class APodspecTask : DefaultTask() {
 
     init {
+        group = IOS_PUBLISHING
         description = "Generate podspec"
     }
 
@@ -306,6 +314,7 @@ abstract class PodspecDeployTask: Exec() {
         //dependsOn("aaPodspecTask")
         //dependsOn("podRepo")
         workingDir = project.rootDir
+        group = IOS_PUBLISHING
     }
 
     @get:Input
@@ -325,6 +334,7 @@ abstract class PodspecDeployTask: Exec() {
 }
 
 tasks.register("AA_pushPod") {
+    group = IOS_PUBLISHING
     doLast {
         val process = ProcessBuilder(
             "pod", "trunk", "push", "sharedLibraryZhurid.podspec", "--allow-warnings"
@@ -341,11 +351,10 @@ tasks.register("AA_pushPod") {
             throw RuntimeException("pushPod Failed Execution of pod trunk push failed with exit code $exitCode")
         }
     }
-
 }
 
-tasks.register("AA_getCurrentPublishedPodVersion") {
-    group = "ios_publishing"
+val getCurrentPublishedPodVersion by tasks.registering{
+    group = IOS_PUBLISHING
     doLast {
         val podName = "sharedLibraryZhurid"
         val outputStream = ByteArrayOutputStream()
