@@ -1,6 +1,8 @@
 [versions]
 agp = "8.2.2"
+deploy = "2.3.0"
 kotlin = "1.9.20"
+pods = "1.9.22"
 compose = "1.5.4"
 compose-compiler = "1.5.4"
 compose-material3 = "1.1.2"
@@ -18,6 +20,7 @@ compose-material3 = { module = "androidx.compose.material3:material3", version.r
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
+kmmDeploy = { id = "io.github.kevinnzou.kmmdeploy", version.ref = "deploy" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
-kotlinCocoapods = { id = "org.jetbrains.kotlin.native.cocoapods", version.ref = "kotlin" }
+kotlinCocoapods = { id = "org.jetbrains.kotlin.native.cocoapods", version.ref = "pods" }
