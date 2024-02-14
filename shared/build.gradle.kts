@@ -343,7 +343,7 @@ val updatePodSpec by tasks.registering {
     group = IOS_PUBLISHING
     val podspec = """
             Pod::Spec.new do |spec|
-                spec.name                     = 'sharedLibrary'
+                spec.name                     = 'sharedLibraryZhurid'
                 spec.version                  = '${project.version}'
                 spec.homepage                 = 'https://github.com/mzfkr97/SharedLibrary'
                 spec.source       = { :http => "https://github.com/mzfkr97/SharedLibrary/releases/${project.version}/shared.xcframework.zip" }
@@ -359,7 +359,7 @@ val updatePodSpec by tasks.registering {
                 spec.ios.deployment_target = '11.0'
             end
         """.trimIndent()
-    val outFile = File(project.rootDir, "sharedLibrary.podspec") //"${project.name}.podspec"
+    val outFile = File(project.rootDir, "sharedLibraryZhurid.podspec") //"${project.name}.podspec"
     outFile.writeText(podspec)
 
     logger.lifecycle("Каталог ${podspec}")
