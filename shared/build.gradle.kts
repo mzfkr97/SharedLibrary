@@ -8,7 +8,7 @@ plugins {
     //id("io.github.donadev.kmm.ios_deploy.plugin") version "0.0.20"
 }
 
-version = "1.0.9"
+version = "1.0.13"
 val iOSBinaryName = "shared"
 
 val aaPodspecTask by tasks.registering(APodspecTask::class)
@@ -188,25 +188,34 @@ val AAcreateGitHubFolder: TaskProvider<Task> by tasks.registering {
 //    }
 
 tasks.register("AAAcommitChanges") {
-
-   // dependsOn(aaprepareSharedFrameworks)
-
     description = "Commits all changes with a default commit message."
-    doLast {
-        val commitMessage = "Update files"
-//        exec {
-//            commandLine("git", "add", "$projectDir/$releases/$version")
-//            commandLine("git", "commit", "-m", commitMessage)
-//        }
-        exec {
-            commandLine("git", "add", ".")
-        }
-        // Коммит изменений
-        exec {
-            commandLine("git", "commit", "-m", "Committing all changes")
-        }
 
+    dependsOn(aaprepareSharedFrameworks)
+
+    val gitStatusOutput = ByteArrayOutputStream()
+    exec {
+        commandLine = listOf("git", "status", "--porcelain")
+        standardOutput = gitStatusOutput
     }
+    if (gitStatusOutput.toString().isBlank()) {
+        println("***************No changes to commit.")
+        return@register
+    }
+    exec {
+        commandLine = listOf("git", "add", ".")
+    }
+    exec {
+        commandLine = listOf("git", "commit", "-m", "Commit changes")
+    }
+//    doLast {
+//        exec {
+//            commandLine("git", "add", "$projectDir/releases/$version")
+//        }
+//        exec {
+//            commandLine("git", "commit", "-m", "Committing all changes")
+//        }
+//
+//    }
 }
 
 abstract class AACreateFileTask : DefaultTask() {
@@ -326,6 +335,7 @@ tasks.register("AA_pushPod") {
             throw RuntimeException("pushPod Failed Execution of pod trunk push failed with exit code $exitCode")
         }
     }
+
 }
 
 tasks.register("AA_getCurrentPublishedPodVersion") {
