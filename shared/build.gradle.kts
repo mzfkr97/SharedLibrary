@@ -359,8 +359,7 @@ val updatePodSpec by tasks.registering {
                 spec.ios.deployment_target = '11.0'
             end
         """.trimIndent()
-    //val outFile = File(project.rootDir, "${project.name}.podspec")
-    val outFile = File(project.rootDir, "sharedLibrary.podspec")
+    val outFile = File(project.rootDir, "sharedLibrary.podspec") //"${project.name}.podspec"
     outFile.writeText(podspec)
 
     logger.lifecycle("Каталог ${podspec}")
