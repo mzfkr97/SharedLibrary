@@ -75,11 +75,11 @@ android {
 tasks.create<Zip>("packageDistribution") {
     group = IOS_PUBLISHING
     val localFolderPath = "$projectDir/releases/$version"
+    delete("$rootDir/XCFramework")
     copy {
         from("$buildDir/XCFrameworks/release")
         into("$rootDir/XCFramework")
     }
-    delete("$rootDir/XCFramework")
     delete("$rootDir/${iOSBinaryName}.xcframework.zip")
     archiveFileName.set("${iOSBinaryName}.xcframework.zip")
     //destinationDirectory.set(layout.projectDirectory.dir("../"))
