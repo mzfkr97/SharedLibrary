@@ -8,7 +8,7 @@ plugins {
     //id("io.github.donadev.kmm.ios_deploy.plugin") version "0.0.20"
 }
 
-version = "1.0.14"
+version = "1.0.15"
 val iOSBinaryName = "shared"
 
 val aaPodspecTask by tasks.registering(APodspecTask::class)
@@ -215,9 +215,11 @@ val gitStatus by tasks.registering(Exec::class) {
 }
 
 val AAAgitCommit by tasks.registering(Exec::class) {
-    dependsOn("assembleXCFramework", "packageDistribution", gitStatus)
+    dependsOn("assembleXCFramework", "packageDistribution")
 
-    onlyIf { gitStatus.get().standardOutput.toString().trim().isNotEmpty() }
+    commandLine("git", "status", "--porcelain")
+    standardOutput = ByteArrayOutputStream()
+    onlyIf { standardOutput.toString().trim().isNotEmpty() }
     doLast {
         commandLine("git", "commit", "-am", "Автоматический коммит")
     }
