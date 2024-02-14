@@ -8,7 +8,7 @@ plugins {
     //id("io.github.donadev.kmm.ios_deploy.plugin") version "0.0.20"
 }
 
-version = "1.0.8"
+version = "1.0.9"
 val iOSBinaryName = "shared"
 
 val aaPodspecTask by tasks.registering(APodspecTask::class)
@@ -106,30 +106,32 @@ val aaprepareSharedFrameworks: TaskProvider<Task> by tasks.registering {
 //    doFirst {
 //        aACreateFileTask.get()
 //    }
-    doLast {
-        // Update Podspec Version
-        val poddir = File("$rootDir/$iOSBinaryName.podspec")
-        val podtempFile = File("$rootDir/$iOSBinaryName.podspec.new")
-        val podreader = poddir.bufferedReader()
-        val podwriter = podtempFile.bufferedWriter()
-        var podcurrentLine: String?
-
-        while (podreader.readLine().also { currLine -> podcurrentLine = currLine } != null) {
-            if (podcurrentLine?.trim()?.startsWith("spec.version") == true) {
-                podwriter.write("    spec.version       = \"${version}\"" + System.lineSeparator())
-            } else if (podcurrentLine?.trim()?.startsWith("spec.source") == true) {
-                podwriter.write("    spec.source       = { :http => \"https://github.com/mzfkr97/SharedLibrary/tree/${iOSBinaryName}.xcframework.zip\" }" + System.lineSeparator())
-            } else {
-                podwriter.write(podcurrentLine + System.lineSeparator())
-            }
-        }
-        podwriter.close()
-        podreader.close()
-        podtempFile.renameTo(poddir)
-    }
+//    doLast {
+//        // Update Podspec Version
+//        val poddir = File("$rootDir/$iOSBinaryName.podspec")
+//        val podtempFile = File("$rootDir/$iOSBinaryName.podspec.new")
+//        val podreader = poddir.bufferedReader()
+//        val podwriter = podtempFile.bufferedWriter()
+//        var podcurrentLine: String?
+//
+//        while (podreader.readLine().also { currLine -> podcurrentLine = currLine } != null) {
+//            if (podcurrentLine?.trim()?.startsWith("spec.version") == true) {
+//                podwriter.write("    spec.version       = \"${version}\"" + System.lineSeparator())
+//            } else if (podcurrentLine?.trim()?.startsWith("spec.source") == true) {
+//                podwriter.write("    spec.source       = { :http => \"https://github.com/mzfkr97/SharedLibrary/tree/${iOSBinaryName}.xcframework.zip\" }" + System.lineSeparator())
+//            } else {
+//                podwriter.write(podcurrentLine + System.lineSeparator())
+//            }
+//        }
+//        podwriter.close()
+//        podreader.close()
+//        podtempFile.renameTo(poddir)
+//    }
 //    project.exec {
 //        commandLine("git", "add", localFolderPath)
 //    }
+
+
 }
 
 tasks.create<Zip>("packageDistribution") {
@@ -184,6 +186,28 @@ val AAcreateGitHubFolder: TaskProvider<Task> by tasks.registering {
 //        logger.warn("Unable to determine current branch: ${error.message}")
 //        "master"
 //    }
+
+tasks.register("AAAcommitChanges") {
+
+   // dependsOn(aaprepareSharedFrameworks)
+
+    description = "Commits all changes with a default commit message."
+    doLast {
+        val commitMessage = "Update files"
+//        exec {
+//            commandLine("git", "add", "$projectDir/$releases/$version")
+//            commandLine("git", "commit", "-m", commitMessage)
+//        }
+        exec {
+            commandLine("git", "add", ".")
+        }
+        // Коммит изменений
+        exec {
+            commandLine("git", "commit", "-m", "Committing all changes")
+        }
+
+    }
+}
 
 abstract class AACreateFileTask : DefaultTask() {
 
