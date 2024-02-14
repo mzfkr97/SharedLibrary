@@ -229,13 +229,13 @@ val AAAgitCommit by tasks.registering(Exec::class) {
         val changes = gitStatus.get().standardOutput.toString().trim()
         if (changes.isEmpty()) {
             logger.lifecycle("Нет изменений для коммита")
+            enabled = false
         } else {
             logger.lifecycle("Изменения обнаружены, выполняется коммит")
-            commandLine("git", "commit", "-am", "Автоматический коммит")
         }
     }
+    commandLine("git", "commit", "-am", "Автоматический коммит")
 }
-
 abstract class AACreateFileTask : DefaultTask() {
 
     @get:Input
