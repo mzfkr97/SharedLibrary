@@ -178,13 +178,8 @@ tasks.register("AAAcommitChanges") {
 
 val gitStatus by tasks.registering(Exec::class) {
     group = IOS_PUBLISHING
-    //commandLine("git", "status", "--porcelain")
-    //standardOutput = ByteArrayOutputStream()
-    val gitStatusOutput = ByteArrayOutputStream()
-    exec {
-        commandLine = listOf("git", "status", "--porcelain")
-        standardOutput = gitStatusOutput
-    }
+    commandLine("git", "status", "--porcelain")
+    standardOutput = ByteArrayOutputStream()
 }
 
 val gitCommit by tasks.registering(Exec::class) {
