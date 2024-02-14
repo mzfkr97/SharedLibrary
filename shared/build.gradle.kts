@@ -8,7 +8,7 @@ plugins {
     //id("io.github.donadev.kmm.ios_deploy.plugin") version "0.0.20"
 }
 
-version = "1.0.21"
+version = "1.0.22"
 val iOSBinaryName = "shared"
 val IOS_PUBLISHING = "ios_publishing"
 
@@ -332,9 +332,9 @@ val getCurrentPublishedPodVersion by tasks.registering {
         val versionLine = result.lines().find { it.contains(podName) }
         val version = versionLine?.substringAfter("$podName (")?.substringBefore(")")
         if (version != null) {
-            println("Current published version of $podName is: $version")
+            logger.lifecycle("Current published version of $podName is: $version")
         } else {
-            println("Unable to find the current published version of $podName.")
+            logger.lifecycle("Unable to find the current published version of $podName.")
         }
     }
 }
@@ -343,7 +343,7 @@ val updatePodSpec by tasks.registering {
     group = IOS_PUBLISHING
     val podspec = """
             Pod::Spec.new do |spec|
-                spec.name                     = '${project.name}'
+                spec.name                     = 'sharedLibrary'
                 spec.version                  = '${project.version}'
                 spec.homepage                 = 'https://github.com/mzfkr97/SharedLibrary'
                 spec.source       = { :http => "https://github.com/mzfkr97/SharedLibrary/releases/${project.version}/shared.xcframework.zip" }
@@ -359,7 +359,8 @@ val updatePodSpec by tasks.registering {
                 spec.ios.deployment_target = '11.0'
             end
         """.trimIndent()
-    val outFile = File(project.rootDir, "${project.name}.podspec")
+    //val outFile = File(project.rootDir, "${project.name}.podspec")
+    val outFile = File(project.rootDir, "sharedLibrary.podspec")
     outFile.writeText(podspec)
 
     logger.lifecycle("Каталог ${podspec}")
