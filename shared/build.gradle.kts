@@ -228,10 +228,7 @@ val AAAgitCommit by tasks.registering(Exec::class) {
     val changes = gitStatus.get().standardOutput.toString().trim()
 
     onlyIf { changes.isNotEmpty() }
-    doFirst {
-        commandLine("git", "commit", "-am", "Автоматический коммит")
-
-    }
+    commandLine("git", "commit", "-am", "Автоматический коммит")
 }
 abstract class AACreateFileTask : DefaultTask() {
 
