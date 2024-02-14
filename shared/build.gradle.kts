@@ -232,9 +232,9 @@ val AAAgitCommit by tasks.registering(Exec::class) {
             enabled = false
         } else {
             logger.lifecycle("Изменения обнаружены, выполняется коммит")
+            commandLine("git", "commit", "-am", "Автоматический коммит")
         }
     }
-    commandLine("git", "commit", "-am", "Автоматический коммит")
 }
 abstract class AACreateFileTask : DefaultTask() {
 
