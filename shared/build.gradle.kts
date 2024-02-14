@@ -188,128 +188,14 @@ val gitCommit by tasks.registering(Exec::class) {
 
     onlyIf { gitStatus.get().standardOutput.toString().trim().isNotEmpty() }
     doLast {
-        commandLine("git", "commit", "-am", "Автоматический коммит")
-    }
-}
-
-abstract class AACreateFileTask : DefaultTask() {
-
-    @get:Input
-    abstract val localFolderPath: Property<String>
-
-    @TaskAction
-    fun action() {
-
-//        project.tasks.assemble.dependsOn(
-//            project.tasks.named("assembleXCFramework"),
-//            project.tasks.named("packageDistribution")
-//        )
-
-        val dir = File(localFolderPath.get())
-        if (!dir.exists()) dir.mkdirs()
-    }
-}
-
-
-abstract class APodspecTask : DefaultTask() {
-
-    init {
-        group = IOS_PUBLISHING
-        description = "Generate podspec"
-    }
-
-    @get:Input
-    abstract val extension: Property<DeployExtension>
-
-    @get:Input
-    abstract val xcFrameworkPath: Property<String>
-
-    private fun getPodspec(extension: DeployExtension): String {
-        return """
-            Pod::Spec.new do |spec|
-                spec.name                     = '${project.name}'
-                spec.version                  = '${project.version}'
-                spec.homepage                 = '${extension.homepage.get()}'
-                spec.source                   = { :git => "${extension.gitUrl.get()}", :tag => spec.version.to_s }
-                spec.authors                  = '${extension.authors.get()}'
-                spec.license                  = { :type => '${extension.licenseType.get()}', :file => '${extension.licenseFile.get()}' }
-                spec.summary                  = '${extension.summary.get()}'
-                spec.vendored_frameworks      = "${xcFrameworkPath.get()}"
-                spec.libraries                = "c++"
-                spec.static_framework         = true
-                spec.module_name              = "#{spec.name}_umbrella"
-                spec.pod_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64' }
-                spec.user_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64' }
-                spec.ios.deployment_target = '11.0'
-            end
-        """.trimIndent()
-    }
-
-    @TaskAction
-    fun execute() {
-        val podspec = getPodspec(extension.get())
-        val outFile = File(project.rootDir, "${project.name}.podspec")
-        outFile.writeText(podspec)
-    }
-}
-
-abstract class DeployExtension @Inject constructor() {
-
-    abstract val summary: Property<String>
-    abstract val specRepository: Property<SpecRepository>
-    abstract val gitUrl: Property<String>
-    abstract val homepage: Property<String>
-    abstract val authors: Property<String>
-    abstract val licenseType: Property<String>
-    abstract val licenseFile: Property<String>
-
-}
-
-data class SpecRepository(val name: String, val url: String)
-
-abstract class PodspecDeployTask : Exec() {
-
-    init {
-        description = "Deploys podspec"
-        //dependsOn("aaPodspecTask")
-        //dependsOn("podRepo")
-        workingDir = project.rootDir
-        group = IOS_PUBLISHING
-    }
-
-    @get:Input
-    abstract val podspecName: Property<String>
-
-    override fun exec() {
-        executable = "pod"
-        args(mutableListOf<String>().apply {
-            add("trunk")
-            add("push")
-            add(podspecName.get())
-            add("--allow-warnings")
-            //add(extension.get().specRepository.get().name)
-        })
-        super.exec()
-    }
-}
-
-val pushPod by tasks.registering {
-    group = IOS_PUBLISHING
-    doLast {
-        val process = ProcessBuilder(
-            "pod", "trunk", "push", "sharedLibraryZhurid.podspec", "--allow-warnings"
-        ).apply {
-            directory(project.rootDir)
-            redirectErrorStream(true)
-        }.start()
-
-        process.inputStream.bufferedReader().use {
-            it.lines().forEach { line -> println(line) }
+        exec {
+            commandLine = listOf("git", "add", ".")
         }
-        val exitCode = process.waitFor()
-        if (exitCode != 0) {
-            throw RuntimeException("pushPod Failed Execution of pod trunk push failed with exit code $exitCode")
+        exec {
+            commandLine = listOf("git", "commit", "-am", "Commit changes")
         }
+//        commandLine("git", "commit", "-am", "Автоматический коммит")
+//        commandLine("git", "commit", "-am", "Автоматический коммит")
     }
 }
 
@@ -335,6 +221,31 @@ val getCurrentPublishedPodVersion by tasks.registering {
             logger.lifecycle("Current published version of $podName is: $version")
         } else {
             logger.lifecycle("Unable to find the current published version of $podName.")
+        }
+    }
+}
+
+val publishPod by tasks.registering {
+    group = IOS_PUBLISHING
+    dependsOn(updatePodSpec, pushPod )
+}
+
+val pushPod by tasks.registering {
+    group = IOS_PUBLISHING
+    doLast {
+        val process = ProcessBuilder(
+            "pod", "trunk", "push", "sharedLibraryZhurid.podspec", "--allow-warnings"
+        ).apply {
+            directory(project.rootDir)
+            redirectErrorStream(true)
+        }.start()
+
+        process.inputStream.bufferedReader().use {
+            it.lines().forEach { line -> println(line) }
+        }
+        val exitCode = process.waitFor()
+        if (exitCode != 0) {
+            throw RuntimeException("pushPod Failed Execution of pod trunk push failed with exit code $exitCode")
         }
     }
 }
