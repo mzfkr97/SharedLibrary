@@ -199,14 +199,15 @@ tasks.register("AAAcommitChanges") {
     }
     if (gitStatusOutput.toString().isBlank()) {
         println("***************No changes to commit.")
-        return@register
+    } else {
+        exec {
+            commandLine = listOf("git", "add", ".")
+        }
+        exec {
+            commandLine = listOf("git", "commit", "-m", "Commit changes")
+        }
     }
-    exec {
-        commandLine = listOf("git", "add", ".")
-    }
-    exec {
-        commandLine = listOf("git", "commit", "-m", "Commit changes")
-    }
+
 //    doLast {
 //        exec {
 //            commandLine("git", "add", "$projectDir/releases/$version")
