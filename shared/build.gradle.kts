@@ -8,7 +8,7 @@ plugins {
     //id("io.github.donadev.kmm.ios_deploy.plugin") version "0.0.20"
 }
 
-version = "1.0.28"
+version = "1.0.30"
 val iOSBinaryName = "shared"
 val IOS_PUBLISHING = "ios_publishing"
 
@@ -72,7 +72,25 @@ android {
     }
 }
 
-tasks.create<Zip>("packageDistribution") {
+val frameworkName by project.extra { "shared2.xcframework.zip" }
+
+val createIosFramework by tasks.registering {
+    group = IOS_PUBLISHING
+    dependsOn("assembleXCFramework", createIosDistributionPackage, gitCommitFramework)
+}
+
+val gitCommitFramework by tasks.registering(Exec::class) {
+    group = IOS_PUBLISHING
+    commandLine("git", "status", "--porcelain")
+    standardOutput = ByteArrayOutputStream()
+    doLast {
+        exec {
+            commandLine = listOf("git", "add", "$projectDir/releases/$version")
+        }
+    }
+}
+
+val createIosDistributionPackage by tasks.registering(Zip::class) {
     group = IOS_PUBLISHING
     val localFolderPath = "$projectDir/releases/$version"
     delete("$rootDir/XCFramework")
@@ -82,94 +100,64 @@ tasks.create<Zip>("packageDistribution") {
     }
     delete("$rootDir/${iOSBinaryName}.xcframework.zip")
     archiveFileName.set("${iOSBinaryName}.xcframework.zip")
-    //destinationDirectory.set(layout.projectDirectory.dir("../"))
     destinationDirectory.set(layout.projectDirectory.dir(localFolderPath))
     from(layout.projectDirectory.dir("../XCFramework"))
+
+    project.extra.set(frameworkName, "${iOSBinaryName}.xcframework.zip")
 }
 
-val AAcreateGitHubFolder: TaskProvider<Task> by tasks.registering {
+val publishIos by tasks.registering {
+    group = IOS_PUBLISHING
+    description = "Updated pod spec file and publish version on cocoapods"
+    dependsOn(updatePodSpec, pushPod)
+}
+
+val updatePodSpec by tasks.registering {
+    group = IOS_PUBLISHING
+    val podspec = """
+            Pod::Spec.new do |spec|
+                spec.name                     = 'sharedLibraryZhurid'
+                spec.version                  = '${project.version}'
+                spec.homepage                 = 'https://github.com/mzfkr97/SharedLibrary'
+                spec.source       = { :http => "https://github.com/mzfkr97/SharedLibrary/raw/master/shared/releases/${project.version}/${frameworkName}" }
+                spec.authors                  = 'mzfkr97'
+                spec.license                  = 'https://opensource.org/licenses/Apache-2.0'
+                spec.summary                  = 'SharedLibrary summary'
+                spec.vendored_frameworks      = "shared.xcframework"
+                spec.libraries                = "c++"
+                spec.static_framework         = true
+                spec.pod_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64' }
+                spec.user_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64' }
+                spec.ios.deployment_target = '11.0'
+            end
+        """.trimIndent()
+    val outFile = File(project.rootDir, "sharedLibraryZhurid.podspec") //"${project.name}.podspec"
+    outFile.writeText(podspec)
+
+    logger.lifecycle("Pod: ${podspec}")
+}
+
+val pushPod by tasks.registering {
     group = IOS_PUBLISHING
     doLast {
-        val folderName = "releases"
-        val dir = file("$projectDir/$folderName/$version")
-        if (!dir.exists()) {
-            dir.mkdirs()
-        } else {
-            logger.lifecycle("Каталог '${dir.absolutePath}' уже существует.")
+        val process = ProcessBuilder(
+            "pod", "trunk", "push", "sharedLibraryZhurid.podspec", "--allow-warnings" //TODO hardcoded
+        ).apply {
+            directory(project.rootDir)
+            redirectErrorStream(true)
+        }.start()
+
+        process.inputStream.bufferedReader().use {
+            it.lines().forEach { line -> println(line) }
         }
-//        project.exec {
-//            commandLine("git", "add", "$projectDir/$folderName/$version")
-//
-//            //commandLine = "git add $localFolderPath".split(" ")
-//            //commandLine = "git commit -m"
-//            //commandLine = "git push".split(" ")
-////            commandLine("git", "add", "$folderName/$fileName")
-////            commandLine("git", "commit", "-m", "Add file via Gradle task")
-////            commandLine("git", "push")
-//        }
-    }
-}
-
-//fun gitBranch(): String =
-//    runCatching {
-//        val byteOut = ByteArrayOutputStream()
-//        project.exec {
-//            commandLine = "git rev-parse --abbrev-ref HEAD".split(" ")
-//            standardOutput = byteOut
-//        }
-//        String(byteOut.toByteArray()).trim().also {
-//            if (it == "HEAD") {
-//                logger.warn("Unable to determine current branch: Project is checked out with detached head!")
-//            }
-//        }
-//    }.getOrElse { error ->
-//        logger.warn("Unable to determine current branch: ${error.message}")
-//        "master"
-//    }
-
-tasks.register("AAAcommitChanges") {
-    group = IOS_PUBLISHING
-    description = "Commits all changes with a default commit message."
-
-    val gitStatusOutput = ByteArrayOutputStream()
-    exec {
-        commandLine = listOf("git", "status", "--porcelain")
-        standardOutput = gitStatusOutput
-    }
-    if (gitStatusOutput.toString().isBlank()) {
-        println("***************No changes to commit.")
-    } else {
-        exec {
-            commandLine = listOf("git", "add", ".")
-        }
-        exec {
-            commandLine = listOf("git", "commit", "-m", "Commit changes")
+        val exitCode = process.waitFor()
+        if (exitCode != 0) {
+            throw RuntimeException("pushPod Failed Execution of pod trunk push failed with exit code $exitCode")
         }
     }
 }
 
-val gitStatus by tasks.registering(Exec::class) {
-    group = IOS_PUBLISHING
-    commandLine("git", "status", "--porcelain")
-    standardOutput = ByteArrayOutputStream()
-}
-
-val gitCommit by tasks.registering(Exec::class) {
-    group = IOS_PUBLISHING
-    dependsOn("assembleXCFramework", "packageDistribution")
-
-    onlyIf { gitStatus.get().standardOutput.toString().trim().isNotEmpty() }
-    doLast {
-        exec {
-            commandLine = listOf("git", "add", "$projectDir/releases/$version")
-        }
-        exec {
-            commandLine = listOf("git", "commit", "-am", "Commit changes")
-        }
-    }
-}
-
-val getCurrentPublishedPodVersion by tasks.registering {
+val getLatestPublishedPodVersion by tasks.registering {
     group = IOS_PUBLISHING
 
     doLast {
@@ -187,61 +175,13 @@ val getCurrentPublishedPodVersion by tasks.registering {
         val result = outputStream.toString()
         val versionLine = result.lines().find { it.contains(podName) }
         val version = versionLine?.substringAfter("$podName (")?.substringBefore(")")
-        if (version != null) {
-            logger.lifecycle("Current published version of $podName is: $version")
-        } else {
-            logger.lifecycle("Unable to find the current published version of $podName.")
-        }
+
+        logger.lifecycle(
+            version?.let {
+                "Current published version of $podName is: $version"
+            } ?: run {
+                "Unable to find the current published version of $podName."
+            }
+        )
     }
-}
-
-val publishPod by tasks.registering {
-    group = IOS_PUBLISHING
-    dependsOn(updatePodSpec, pushPod )
-}
-
-val pushPod by tasks.registering {
-    group = IOS_PUBLISHING
-    doLast {
-        val process = ProcessBuilder(
-            "pod", "trunk", "push", "sharedLibraryZhurid.podspec", "--allow-warnings"
-        ).apply {
-            directory(project.rootDir)
-            redirectErrorStream(true)
-        }.start()
-
-        process.inputStream.bufferedReader().use {
-            it.lines().forEach { line -> println(line) }
-        }
-        val exitCode = process.waitFor()
-        if (exitCode != 0) {
-            throw RuntimeException("pushPod Failed Execution of pod trunk push failed with exit code $exitCode")
-        }
-    }
-}
-
-val updatePodSpec by tasks.registering {
-    group = IOS_PUBLISHING
-    val podspec = """
-            Pod::Spec.new do |spec|
-                spec.name                     = 'sharedLibraryZhurid'
-                spec.version                  = '${project.version}'
-                spec.homepage                 = 'https://github.com/mzfkr97/SharedLibrary'
-                spec.source       = { :http => "https://github.com/mzfkr97/SharedLibrary/raw/master/shared/releases/${project.version}/shared.xcframework.zip" }
-                spec.authors                  = 'mzfkr97'
-                spec.license                  = 'https://opensource.org/licenses/Apache-2.0'
-                spec.summary                  = 'SharedLibrary summary'
-                spec.vendored_frameworks      = "shared.xcframework"
-                spec.libraries                = "c++"
-                spec.static_framework         = true
-                spec.module_name              = "#{spec.name}_umbrella"
-                spec.pod_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64' }
-                spec.user_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64' }
-                spec.ios.deployment_target = '11.0'
-            end
-        """.trimIndent()
-    val outFile = File(project.rootDir, "sharedLibraryZhurid.podspec") //"${project.name}.podspec"
-    outFile.writeText(podspec)
-
-    logger.lifecycle("Pod: ${podspec}")
 }
