@@ -140,12 +140,12 @@ val gitStatus by tasks.registering(Exec::class) {
 
 val gitCommit by tasks.registering(Exec::class) {
     group = IOS_PUBLISHING
-    dependsOn("assembleXCFramework", "packageDistribution")
+    //dependsOn("assembleXCFramework", "packageDistribution")
 
     onlyIf { gitStatus.get().standardOutput.toString().trim().isNotEmpty() }
     doLast {
         exec {
-            commandLine = listOf("git", "add", "$projectDir/releases/$version")
+            commandLine = listOf("git", "add", "$projectDir/releases/1.0.29")
         }
         exec {
             commandLine = listOf("git", "commit", "-am", "Commit changes")
