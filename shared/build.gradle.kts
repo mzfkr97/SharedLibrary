@@ -76,27 +76,16 @@ val frameworkName by project.extra { "shared2.xcframework.zip" }
 
 val createIosFramework by tasks.registering {
     group = IOS_PUBLISHING
-    dependsOn("assembleXCFramework", createIosDistributionPackage)
-}
-
-val gitStatus by tasks.registering(Exec::class) {
-    group = IOS_PUBLISHING
-    commandLine("git", "status", "--porcelain")
-    standardOutput = ByteArrayOutputStream()
-    logger.lifecycle("****${standardOutput.toString().trim().isNotEmpty()}")
+    dependsOn("assembleXCFramework", createIosDistributionPackage, gitCommitFramework)
 }
 
 val gitCommitFramework by tasks.registering(Exec::class) {
     group = IOS_PUBLISHING
     commandLine("git", "status", "--porcelain")
     standardOutput = ByteArrayOutputStream()
-    //onlyIf { gitStatus.get().standardOutput.toString().trim().isNotEmpty() }
     doLast {
         exec {
             commandLine = listOf("git", "add", "$projectDir/releases/$version")
-        }
-        exec {
-            commandLine = listOf("git", "commit", "-am", "Commit changes")
         }
     }
 }
