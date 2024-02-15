@@ -8,7 +8,7 @@ plugins {
     //id("io.github.donadev.kmm.ios_deploy.plugin") version "0.0.20"
 }
 
-version = "1.0.25"
+version = "1.0.28"
 val iOSBinaryName = "shared"
 val IOS_PUBLISHING = "ios_publishing"
 
@@ -227,7 +227,7 @@ val updatePodSpec by tasks.registering {
                 spec.name                     = 'sharedLibraryZhurid'
                 spec.version                  = '${project.version}'
                 spec.homepage                 = 'https://github.com/mzfkr97/SharedLibrary'
-                spec.source       = { :http => "https://github.com/mzfkr97/SharedLibrary/releases/${project.version}/shared.xcframework.zip" }
+                spec.source       = { :http => "https://github.com/mzfkr97/SharedLibrary/raw/master/shared/releases/${project.version}/shared.xcframework.zip" }
                 spec.authors                  = 'mzfkr97'
                 spec.license                  = 'https://opensource.org/licenses/Apache-2.0'
                 spec.summary                  = 'SharedLibrary summary'
