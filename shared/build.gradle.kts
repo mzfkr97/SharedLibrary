@@ -8,7 +8,7 @@ plugins {
     //id("io.github.donadev.kmm.ios_deploy.plugin") version "0.0.20"
 }
 
-version = "1.0.30"
+version = "1.0.31"
 val iOSBinaryName = "shared"
 val IOS_PUBLISHING = "ios_publishing"
 
@@ -72,8 +72,6 @@ android {
     }
 }
 
-val frameworkName by project.extra { "shared2.xcframework.zip" }
-
 val createIosFramework by tasks.registering {
     group = IOS_PUBLISHING
     dependsOn("assembleXCFramework", createIosDistributionPackage, gitCommitFramework)
@@ -102,8 +100,6 @@ val createIosDistributionPackage by tasks.registering(Zip::class) {
     archiveFileName.set("${iOSBinaryName}.xcframework.zip")
     destinationDirectory.set(layout.projectDirectory.dir(localFolderPath))
     from(layout.projectDirectory.dir("../XCFramework"))
-
-    project.extra.set(frameworkName, "${iOSBinaryName}.xcframework.zip")
 }
 
 val publishIos by tasks.registering {
@@ -119,7 +115,7 @@ val updatePodSpec by tasks.registering {
                 spec.name                     = 'sharedLibraryZhurid'
                 spec.version                  = '${project.version}'
                 spec.homepage                 = 'https://github.com/mzfkr97/SharedLibrary'
-                spec.source       = { :http => "https://github.com/mzfkr97/SharedLibrary/raw/master/shared/releases/${project.version}/${frameworkName}" }
+                spec.source       = { :http => "https://github.com/mzfkr97/SharedLibrary/raw/master/shared/releases/${project.version}/shared.xcframework.zip" }
                 spec.authors                  = 'mzfkr97'
                 spec.license                  = 'https://opensource.org/licenses/Apache-2.0'
                 spec.summary                  = 'SharedLibrary summary'
