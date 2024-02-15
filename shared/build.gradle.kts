@@ -131,7 +131,7 @@ tasks.register("AAAcommitChanges") {
     }
 }
 
-val gitStatus by tasks.registering(Exec::class) {
+private val gitStatus by tasks.registering(Exec::class) {
     group = IOS_PUBLISHING
     commandLine("git", "status", "--porcelain")
     standardOutput = ByteArrayOutputStream()
