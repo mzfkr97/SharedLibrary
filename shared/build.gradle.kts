@@ -8,7 +8,7 @@ plugins {
     //id("io.github.donadev.kmm.ios_deploy.plugin") version "0.0.20"
 }
 
-version = "1.0.28"
+version = "1.0.29"
 val iOSBinaryName = "shared"
 val IOS_PUBLISHING = "ios_publishing"
 
@@ -110,23 +110,6 @@ val AAcreateGitHubFolder: TaskProvider<Task> by tasks.registering {
     }
 }
 
-//fun gitBranch(): String =
-//    runCatching {
-//        val byteOut = ByteArrayOutputStream()
-//        project.exec {
-//            commandLine = "git rev-parse --abbrev-ref HEAD".split(" ")
-//            standardOutput = byteOut
-//        }
-//        String(byteOut.toByteArray()).trim().also {
-//            if (it == "HEAD") {
-//                logger.warn("Unable to determine current branch: Project is checked out with detached head!")
-//            }
-//        }
-//    }.getOrElse { error ->
-//        logger.warn("Unable to determine current branch: ${error.message}")
-//        "master"
-//    }
-
 tasks.register("AAAcommitChanges") {
     group = IOS_PUBLISHING
     description = "Commits all changes with a default commit message."
@@ -156,7 +139,7 @@ val gitStatus by tasks.registering(Exec::class) {
 
 val gitCommit by tasks.registering(Exec::class) {
     group = IOS_PUBLISHING
-    dependsOn("assembleXCFramework", "packageDistribution", "AAAcommitChanges")
+    dependsOn("assembleXCFramework", "packageDistribution")
 
     onlyIf { gitStatus.get().standardOutput.toString().trim().isNotEmpty() }
     doLast {
