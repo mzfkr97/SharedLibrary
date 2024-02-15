@@ -8,7 +8,7 @@ plugins {
     //id("io.github.donadev.kmm.ios_deploy.plugin") version "0.0.20"
 }
 
-version = "1.0.22"
+version = "1.0.25"
 val iOSBinaryName = "shared"
 val IOS_PUBLISHING = "ios_publishing"
 
@@ -231,7 +231,7 @@ val updatePodSpec by tasks.registering {
                 spec.authors                  = 'mzfkr97'
                 spec.license                  = 'https://opensource.org/licenses/Apache-2.0'
                 spec.summary                  = 'SharedLibrary summary'
-                spec.vendored_frameworks      = "shared.xcframework.zip"
+                spec.vendored_frameworks      = "shared.xcframework"
                 spec.libraries                = "c++"
                 spec.static_framework         = true
                 spec.module_name              = "#{spec.name}_umbrella"
