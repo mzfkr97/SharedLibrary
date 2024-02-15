@@ -156,7 +156,7 @@ val gitStatus by tasks.registering(Exec::class) {
 
 val gitCommit by tasks.registering(Exec::class) {
     group = IOS_PUBLISHING
-    dependsOn("assembleXCFramework", "packageDistribution")
+    dependsOn("assembleXCFramework", "packageDistribution", "AAAcommitChanges")
 
     onlyIf { gitStatus.get().standardOutput.toString().trim().isNotEmpty() }
     doLast {
@@ -187,17 +187,20 @@ val getCurrentPublishedPodVersion by tasks.registering {
         val result = outputStream.toString()
         val versionLine = result.lines().find { it.contains(podName) }
         val version = versionLine?.substringAfter("$podName (")?.substringBefore(")")
-        if (version != null) {
-            logger.lifecycle("Current published version of $podName is: $version")
-        } else {
-            logger.lifecycle("Unable to find the current published version of $podName.")
-        }
+
+        logger.lifecycle(
+            version?.let {
+                "Current published version of $podName is: $version"
+            } ?: run {
+                "Unable to find the current published version of $podName."
+            }
+        )
     }
 }
 
 val publishPod by tasks.registering {
     group = IOS_PUBLISHING
-    dependsOn(updatePodSpec, pushPod )
+    dependsOn(updatePodSpec, pushPod)
 }
 
 val pushPod by tasks.registering {
@@ -234,7 +237,6 @@ val updatePodSpec by tasks.registering {
                 spec.vendored_frameworks      = "shared.xcframework"
                 spec.libraries                = "c++"
                 spec.static_framework         = true
-                spec.module_name              = "#{spec.name}_umbrella"
                 spec.pod_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64' }
                 spec.user_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64' }
                 spec.ios.deployment_target = '11.0'
