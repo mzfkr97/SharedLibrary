@@ -8,36 +8,9 @@ plugins {
     //id("io.github.donadev.kmm.ios_deploy.plugin") version "0.0.20"
 }
 
-version = "1.0.22"
+version = "1.0.28"
 val iOSBinaryName = "shared"
 val IOS_PUBLISHING = "ios_publishing"
-
-//val aaPodspecTask by tasks.registering(APodspecTask::class)
-//val aaPodspecDeployTask by tasks.registering(PodspecDeployTask::class)
-//
-//aaPodspecDeployTask.configure {
-//    podspecName.convention("sharedLibraryZhurid.podspec")
-//}
-//
-//
-//aaPodspecTask.configure {
-//    val extensionName = "iosDeploy"
-//    val extensionsa = project.extensions.create(extensionName, DeployExtension::class.java)
-//    extensionsa.summary = "summary"
-//    extensionsa.homepage = "homepage"
-//    extensionsa.gitUrl = ""
-//    extensionsa.authors = ""
-//    extensionsa.licenseType = ""
-//    extensionsa.licenseFile = ""
-//    extensionsa.specRepository = SpecRepository(
-//        name = "name",
-//        url = "url",
-//    )
-//    extension.convention(
-//        extensionsa
-//    )
-//    xcFrameworkPath.convention("shared.xcframework")
-//}
 
 kotlin {
 
@@ -112,7 +85,6 @@ tasks.create<Zip>("packageDistribution") {
     //destinationDirectory.set(layout.projectDirectory.dir("../"))
     destinationDirectory.set(layout.projectDirectory.dir(localFolderPath))
     from(layout.projectDirectory.dir("../XCFramework"))
-
 }
 
 val AAcreateGitHubFolder: TaskProvider<Task> by tasks.registering {
@@ -189,13 +161,11 @@ val gitCommit by tasks.registering(Exec::class) {
     onlyIf { gitStatus.get().standardOutput.toString().trim().isNotEmpty() }
     doLast {
         exec {
-            commandLine = listOf("git", "add", ".")
+            commandLine = listOf("git", "add", "$projectDir/releases/$version")
         }
         exec {
             commandLine = listOf("git", "commit", "-am", "Commit changes")
         }
-//        commandLine("git", "commit", "-am", "Автоматический коммит")
-//        commandLine("git", "commit", "-am", "Автоматический коммит")
     }
 }
 
@@ -257,11 +227,11 @@ val updatePodSpec by tasks.registering {
                 spec.name                     = 'sharedLibraryZhurid'
                 spec.version                  = '${project.version}'
                 spec.homepage                 = 'https://github.com/mzfkr97/SharedLibrary'
-                spec.source       = { :http => "https://github.com/mzfkr97/SharedLibrary/releases/${project.version}/shared.xcframework.zip" }
+                spec.source       = { :http => "https://github.com/mzfkr97/SharedLibrary/raw/master/shared/releases/${project.version}/shared.xcframework.zip" }
                 spec.authors                  = 'mzfkr97'
                 spec.license                  = 'https://opensource.org/licenses/Apache-2.0'
                 spec.summary                  = 'SharedLibrary summary'
-                spec.vendored_frameworks      = "shared.xcframework.zip"
+                spec.vendored_frameworks      = "shared.xcframework"
                 spec.libraries                = "c++"
                 spec.static_framework         = true
                 spec.module_name              = "#{spec.name}_umbrella"
@@ -273,5 +243,5 @@ val updatePodSpec by tasks.registering {
     val outFile = File(project.rootDir, "sharedLibraryZhurid.podspec") //"${project.name}.podspec"
     outFile.writeText(podspec)
 
-    logger.lifecycle("Каталог ${podspec}")
+    logger.lifecycle("Pod: ${podspec}")
 }
