@@ -72,18 +72,11 @@ android {
     }
 }
 
+val frameworkName by project.extra { "shared2.xcframework.zip" }
 
-val createGitHubFolder: TaskProvider<Task> by tasks.registering {
+val createIosFramework by tasks.registering {
     group = IOS_PUBLISHING
-    doLast {
-        val folderName = "releases"
-        val dir = file("$projectDir/$folderName/$version")
-        if (!dir.exists()) {
-            dir.mkdirs()
-        } else {
-            logger.lifecycle("Каталог '${dir.absolutePath}' уже существует.")
-        }
-    }
+    dependsOn("assembleXCFramework", createIosDistributionPackage)
 }
 
 val gitStatus by tasks.registering(Exec::class) {
@@ -93,13 +86,11 @@ val gitStatus by tasks.registering(Exec::class) {
     logger.lifecycle("****${standardOutput.toString().trim().isNotEmpty()}")
 }
 
-val frameworkName by project.extra { "shared2.xcframework.zip" }
-
-val createIosFramework by tasks.registering(Exec::class) {
+val gitCommitFramework by tasks.registering(Exec::class) {
     group = IOS_PUBLISHING
-    dependsOn("assembleXCFramework", "createIosDistributionPackage")
-
-    onlyIf { gitStatus.get().standardOutput.toString().trim().isNotEmpty() }
+    commandLine("git", "status", "--porcelain")
+    standardOutput = ByteArrayOutputStream()
+    //onlyIf { gitStatus.get().standardOutput.toString().trim().isNotEmpty() }
     doLast {
         exec {
             commandLine = listOf("git", "add", "$projectDir/releases/$version")
@@ -110,7 +101,7 @@ val createIosFramework by tasks.registering(Exec::class) {
     }
 }
 
-tasks.create<Zip>("createIosDistributionPackage") {
+val createIosDistributionPackage by tasks.registering(Zip::class) {
     group = IOS_PUBLISHING
     val localFolderPath = "$projectDir/releases/$version"
     delete("$rootDir/XCFramework")
@@ -123,7 +114,7 @@ tasks.create<Zip>("createIosDistributionPackage") {
     destinationDirectory.set(layout.projectDirectory.dir(localFolderPath))
     from(layout.projectDirectory.dir("../XCFramework"))
 
-    project.extra.set(frameworkName,"${iOSBinaryName}.xcframework.zip")
+    project.extra.set(frameworkName, "${iOSBinaryName}.xcframework.zip")
 }
 
 val publishIos by tasks.registering {
