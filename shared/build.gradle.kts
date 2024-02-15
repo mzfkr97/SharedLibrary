@@ -135,6 +135,7 @@ private val gitStatus by tasks.registering(Exec::class) {
     group = IOS_PUBLISHING
     commandLine("git", "status", "--porcelain")
     standardOutput = ByteArrayOutputStream()
+    logger.lifecycle("${standardOutput.toString().trim().isNotEmpty()}")
 }
 
 val gitCommit by tasks.registering(Exec::class) {
