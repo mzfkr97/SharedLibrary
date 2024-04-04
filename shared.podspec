@@ -9,7 +9,7 @@ Pod::Spec.new do |spec|
 
     spec.vendored_frameworks      = "shared.xcframework"
 
-    spec.ios.deployment_target = '16.0'
+    spec.ios.deployment_target = '14.0'
 
     spec.user_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=*simulator*]' => 'arm64' }
     spec.pod_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=*simulator*]' => 'arm64' }
