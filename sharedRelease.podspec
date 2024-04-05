@@ -1,5 +1,5 @@
 Pod::Spec.new do |spec|
-    spec.name                     = 'shared'
+    spec.name                     = 'sharedRelease'
     spec.version       = "1.0.1"
     spec.homepage                 = 'https://github.com/mzfkr97/SharedLibrary'
     spec.source       = { :git => 'https://github.com/mzfkr97/SharedLibrary.git' }
