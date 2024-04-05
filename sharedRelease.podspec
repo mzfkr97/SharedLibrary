@@ -2,7 +2,7 @@ Pod::Spec.new do |spec|
     spec.name                     = 'sharedRelease'
     spec.version       = "1.0.1"
     spec.homepage                 = 'https://github.com/mzfkr97/SharedLibrary'
-    spec.source       = { :git => 'https://github.com/mzfkr97/SharedLibrary/tree/branch_test/releases/download/1.0.1' }
+    spec.source       = { :git => 'https://github.com/mzfkr97/SharedLibrary/tree/branch_test/releases/downlad/1.0.1' }
     spec.authors                  = 'mzfkr97@gmail.com'
     spec.license                  = 'https://opensource.org/licenses/Apache-2.0'
     spec.summary                  = 'SharedLibrary'
