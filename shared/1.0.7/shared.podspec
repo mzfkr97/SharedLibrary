@@ -1,5 +1,5 @@
 Pod::Spec.new do |s|
-    s.name                     = 'shared'
+    s.name                     = 'shared.xcframework.zip'
     s.version                  = '1.0.7'
     s.homepage                 = 'https://github.com/mzfkr97/SharedLibrary.git'
     s.source       = { :git => "https://github.com/mzfkr97/SharedLibrary.git", :tag => s.version.to_s}
