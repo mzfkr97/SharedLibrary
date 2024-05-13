@@ -10,10 +10,7 @@ s.vendored_frameworks = 'scmSdk.framework'
 s.source_files                 = "*/scmSdk.framework/Headers/*.{h,m,swift}"
   s.preserve_paths               = "*"
     s.requires_arc         = true
-s.libraries = 'c++'
 s.platform = :ios
     s.ios.deployment_target = '11.0'
- s.user_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=*simulator*]' => 'arm64' }
-    s.pod_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=*simulator*]' => 'arm64' }
 
 end
