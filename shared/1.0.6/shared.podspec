@@ -8,6 +8,7 @@ Pod::Spec.new do |s|
     s.summary                  = 'ServiceChannel mobile team'
     s.vendored_frameworks      = "scmSdk.framework"
     s.requires_arc         = true
+s.libraries = 'stdc++','z','sqlite3','c++'
 s.platform = :ios
     s.ios.deployment_target = '11.0'
 end
