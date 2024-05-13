@@ -6,6 +6,7 @@ Pod::Spec.new do |s|
     s.authors                  = 'ServiceChannel mobile team'
     s.license                  = 'MIT'
     s.summary                  = 'ServiceChannel mobile team'
+s.vendored_frameworks = 'Resources/shared.framework'
     s.requires_arc         = true
 s.libraries = 'c++'
 s.platform = :ios
