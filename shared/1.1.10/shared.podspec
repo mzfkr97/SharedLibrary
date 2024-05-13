@@ -6,7 +6,7 @@ Pod::Spec.new do |s|
     s.authors                  = 'ServiceChannel mobile team'
     s.license                  = 'MIT'
     s.summary                  = 'ServiceChannel mobile team'
-s.source_files                 = "scmSdk.framework"
+s.source_files                 = "shared.framework"
   s.preserve_paths               = "*"
     s.requires_arc         = true
 s.platform = :ios
