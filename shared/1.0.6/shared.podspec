@@ -1,5 +1,5 @@
 Pod::Spec.new do |s|
-    s.name                     = 'shared'
+    s.name                     = 'scmSdk'
     s.version                  = '1.0.6'
     s.homepage                 = 'https://github.servicechannel.com/ServiceChannel/sdk-android'
     s.source       = { :git => "https://github.com/mzfkr97/SharedLibrary.git", :tag => s.version.to_s}
