@@ -7,8 +7,8 @@ Pod::Spec.new do |s|
     s.license                  = 'MIT'
     s.summary                  = 'ServiceChannel mobile team'
 s.vendored_frameworks = 'scmSdk.framework'
-spec.source_files                 = "*/scmSdk.framework/Headers/*.{h,m,swift}"
-  spec.preserve_paths               = "*"
+s.source_files                 = "*/scmSdk.framework/Headers/*.{h,m,swift}"
+  s.preserve_paths               = "*"
     s.requires_arc         = true
 s.libraries = 'c++'
 s.platform = :ios
