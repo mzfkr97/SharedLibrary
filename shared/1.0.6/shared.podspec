@@ -6,7 +6,7 @@ Pod::Spec.new do |s|
     s.authors                  = 'ServiceChannel mobile team'
     s.license                  = 'https://opensource.org/licenses/Apache-2.0'
     s.summary                  = 'ServiceChannel mobile team'
-    s.vendored_frameworks      = "shared/scmSdk.framework"
+    s.vendored_frameworks      = "shared.framework"
     s.requires_arc         = true
 s.platform = :ios
     s.ios.deployment_target = '11.0'
