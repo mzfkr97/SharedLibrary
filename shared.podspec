@@ -2,7 +2,7 @@ Pod::Spec.new do |s|
     s.name                     = 'shared'
     s.version                  = '1.0.7'
     s.homepage                 = 'https://github.com/mzfkr97/SharedLibrary.git'
-    s.source                   = { :git => "https://github.com/mzfkr97/SharedLibrary.git", :branch => 'master' }
+    s.source                   = { :http => "https://github.com/mzfkr97/SharedLibrary/raw/master/shared.zip" }
     s.authors                  = 'ServiceChannel mobile team'
     s.license                  = 'MIT'
     s.summary                  = 'ServiceChannel mobile team'
