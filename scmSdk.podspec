@@ -5,7 +5,7 @@ Pod::Spec.new do |spec|
     spec.source       = { :http => 'https://github.com/mzfkr97/SharedLibrary/raw/master/scmSdk.xcframework.zip', :flatten => false } 
     spec.authors                  = 'Service channel mobile team'
     spec.license                  = { :type => 'MIT' }
-spec.vendored_frameworks          = "scmSdk.xcframework/ios-arm64/scmSdk.framework"
+spec.vendored_frameworks          = "scmSdk.framework"
   spec.preserve_paths               = "*"
 spec.requires_arc                 = true
   spec.swift_version                = "5.0"
