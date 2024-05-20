@@ -2,7 +2,7 @@ Pod::Spec.new do |spec|
     spec.name                     = 'scmSdk'
     spec.version                  = '7.7.28'
     spec.homepage                 = 'https://github.servicechannel.com/ServiceChannel/sdk-android'
-    spec.source       = { :git => 'https://github.com/mzfkr97/SharedLibrary.git', :tag => '{spec.version}' }
+    spec.source       = { :git => 'https://github.com/mzfkr97/SharedLibrary.git', :tag => spec.version }
     spec.authors                  = 'Service channel mobile team'
     spec.license                  = { :type => 'MIT' }
     spec.summary                  = 'Service channel mobile team'
