@@ -10,5 +10,5 @@ Pod::Spec.new do |spec|
     spec.ios.deployment_target = '11.0'
     spec.source_files = 'scmSdk/**/*.{h,m}'
     spec.public_header_files = 'scmSdk/**/*.h'
+    spec.vendored_frameworks = 'scmSdk.framework'
 end
-
