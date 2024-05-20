@@ -7,6 +7,7 @@ Pod::Spec.new do |spec|
 spec.source_files = 'Pod/Classes'
 spec.resources = 'Pod/Assets/*'
   spec.preserve_paths = 'Pod/Scripts/*'
+spec.public_header_files = '*.h'
     spec.license                  = { :type => 'MIT' }
     spec.summary                  = 'Mobile team'
     spec.static_framework         = false
