@@ -7,7 +7,6 @@ Pod::Spec.new do |spec|
     spec.license                  = { :type => 'MIT' }
     spec.summary                  = 'Mobile team'
     spec.ios.vendored_frameworks = 'ios-arm64/scmSdk.framework'
-    spec.libraries                = 'c++'
     spec.static_framework         = false
     spec.pod_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64' }
     spec.user_target_xcconfig = { 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'arm64' }
