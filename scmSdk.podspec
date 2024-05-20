@@ -7,6 +7,8 @@ Pod::Spec.new do |spec|
     spec.license                  = { :type => 'MIT' }
 spec.vendored_frameworks          = "scmSdk.xcframework/ios-arm64/scmSdk.framework"
   spec.preserve_paths               = "*"
+spec.requires_arc                 = true
+  spec.swift_version                = "5.0"
     spec.summary                  = 'Mobile team'
     spec.static_framework         = false
     spec.ios.deployment_target = '11.0'
