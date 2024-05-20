@@ -4,6 +4,9 @@ Pod::Spec.new do |spec|
     spec.homepage                 = 'https://github.com/mzfkr97'
     spec.source       = { :http => 'https://github.com/mzfkr97/SharedLibrary/releases/download/7.7.51/scmSdk.framework.zip' }
     spec.authors                  = 'Service channel mobile team'
+spec.source_files = 'Pod/Classes'
+spec.resources = 'Pod/Assets/*'
+  spec.preserve_paths = 'Pod/Scripts/*'
     spec.license                  = { :type => 'MIT' }
     spec.summary                  = 'Mobile team'
     spec.static_framework         = false
