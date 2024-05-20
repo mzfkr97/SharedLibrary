@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
     spec.name                     = 'scmSdk'
-    spec.version                  = '7.7.38'
+    spec.version                  = '7.7.39'
     spec.homepage                 = 'https://github.com/mzfkr97'
     spec.source       = { :http => 'https://github.com/mzfkr97/SharedLibrary/raw/master/scmSdk.xcframework.zip', :flatten => false } 
     spec.authors                  = 'Service channel mobile team'
