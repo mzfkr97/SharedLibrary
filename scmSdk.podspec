@@ -6,7 +6,7 @@ Pod::Spec.new do |spec|
     spec.authors                  = 'Service channel mobile team'
     spec.license                  = { :type => 'MIT' }
     spec.summary                  = 'Mobile team'
-    spec.ios.vendored_frameworks = '*/scmSdk.framework'
+    spec.ios.vendored_frameworks = 'scmSdk.framework/scmSdk.framework'
     spec.static_framework         = false
     spec.ios.deployment_target = '11.0'
 end
