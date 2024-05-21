@@ -6,8 +6,8 @@ Pod::Spec.new do |spec|
             = 'https://github.com/mzfkr97'
     spec.source       = { :git => 'https://github.com/mzfkr97/SharedLibrary.git' , :tag => spec.version } 
     spec.authors                  = 'Service channel mobile team'
-spec.vendored_frameworks = 'ios-arm64/scmSdk.framework'
-spec.source_files = 'ios-arm64/scmSdk.framework/Headers/scmSdk.h'
+spec.vendored_frameworks = 'scmSdk.xcframework/ios-arm64/scmSdk.framework'
+spec.source_files = 'scmSdk.xcframework/ios-arm64/scmSdk.framework/Headers/scmSdk.h'
     spec.license                  = { :type => 'MIT' }
   spec.preserve_paths               = "*"
 spec.requires_arc                 = true
